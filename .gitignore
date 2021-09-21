@@ -1,1 +1,4 @@
 .idea
+example
+__pycache__/
+*/__pycache__/

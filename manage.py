@@ -6,31 +6,31 @@ import os
 import argparse
 from argparse import Namespace
 
-from settings import STRATEGIES, DEFAULT_OUTPUT_DIR
+from settings import STRATEGIES, DEFAULT_OUTPUT_DIR, CONFIG
+from core.utils import read_yaml_file
+from core.provider import synchronous_service_provider
 
 
 def main(arguments: Namespace) -> None:
-    strategy = STRATEGIES[arguments.strategy]
+    parsed_config = read_yaml_file(CONFIG)
+    strategy = parsed_config["server"]["type"]
 
     if strategy == "synchronous":
-        pass
+        service = synchronous_service_provider(arguments=arguments, conf=parsed_config)
     elif strategy == "asynchronous":
         pass
     elif strategy == "semi-synchronous":
         pass
     else:
-        pass
+        print("[Failed] Wrong ser")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--out", help="output directory to collect the results", type=str, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--config", help="configuration file to build computation service graph", type=str)
 
     # system
-    parser.add_argument("--strategy", help="type of strategy", type=str, choices=list(STRATEGIES.keys()),
-                        default="sync")
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=1)
 
     args = parser.parse_args()
