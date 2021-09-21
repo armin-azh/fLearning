@@ -13,12 +13,13 @@ class SyncService(AbstractService):
 
         self._arguments = kwargs["arguments"]
 
-        self._servers = [Server(ip=self._serv_host, port=p, arguments=self._arguments) for p in self._serv_ports]
-
         self._barrier = threading.Barrier(self._n_clients)
         self._server_lock = threading.Lock()
+
         t = threading.Thread(target=Server.aggregate, args=(self._server_lock, self._arguments))
         t.start()
+
+        self._servers = [Server(ip=self._serv_host, port=p, arguments=self._arguments) for p in self._serv_ports]
 
         for serv in self._servers:
             t = threading.Thread(target=serv.exec_, args=(self._server_lock,))
@@ -39,4 +40,4 @@ class SyncService(AbstractService):
 
         serv_ports = [int(p["port"]) for _, p in serv_conf["nodes"].items()]
 
-        return cls(serv_host=serv_ip, serv_ports=serv_ports, arguments=arguments)
+        return SyncService(serv_host=serv_ip, serv_ports=serv_ports, arguments=arguments)

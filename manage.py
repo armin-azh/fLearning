@@ -34,6 +34,7 @@ if __name__ == '__main__':
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=1)
 
     # local model
+    parser.add_argument("--model_name",help="Model class name",type=str,default="resnet8_sm")
     parser.add_argument("--epochs", help="total number of client epochs", type=int, default=10)
     parser.add_argument('--frac', default=0.4, type=float, help="the fraction of clients: C")
     parser.add_argument("--batch_size", help="local model batch size", type=int, default=32)
