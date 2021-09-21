@@ -1,0 +1,13 @@
+
+server:
+  - type: synchronous
+  - name: synchronous-service
+  - ip: 127.0.0.1
+  - port: 7070
+  - nodes:
+      - client1:
+          - ip: 127.0.0.1
+          - port: 4040
+      - client2:
+          - ip: 127.0.0.1
+          - port: 4041
