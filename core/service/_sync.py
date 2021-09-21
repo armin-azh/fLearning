@@ -24,7 +24,6 @@ class SyncService(AbstractService):
         arguments = kwargs["arguments"]
 
         serv_conf = conf["server"]
-        serv_name = serv_conf["name"]
         serv_ip = serv_conf["ip"]
         serv_port = int(serv_conf["port"])
         clients = []
