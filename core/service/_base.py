@@ -2,6 +2,7 @@ class AbstractService:
     def __init__(self, *args, **kwargs):
         self._ser_name = kwargs["name"]
         self._ser_type = kwargs["type"]
+        super(AbstractService, self).__init__(*args, **kwargs)
 
     @classmethod
     def create(cls, **kwargs):
