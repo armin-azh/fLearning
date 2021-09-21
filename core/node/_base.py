@@ -10,6 +10,9 @@ class AbstractNode:
     def receive(self, **kwargs):
         raise NotImplementedError
 
+    def exec_(self, **kwargs):
+        raise NotImplementedError
+
 
 class ServerNode(AbstractNode):
     def __init__(self, *args, **kwargs):
@@ -21,6 +24,9 @@ class ServerNode(AbstractNode):
     def receive(self):
         pass
 
+    def exec_(self, **kwargs):
+        pass
+
 
 class ClientNode(AbstractNode):
     def __init__(self, *args, **kwargs):
@@ -30,4 +36,7 @@ class ClientNode(AbstractNode):
         pass
 
     def receive(self):
+        pass
+
+    def exec_(self, **kwargs):
         pass
