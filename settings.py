@@ -12,3 +12,5 @@ STRATEGIES = {
     "sync": "synchronous",
     "async": "asynchronous"
 }
+
+DEFAULT_OUTPUT_DIR = 'result'

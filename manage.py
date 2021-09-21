@@ -6,7 +6,7 @@ import os
 import argparse
 from argparse import Namespace
 
-from settings import STRATEGIES
+from settings import STRATEGIES, DEFAULT_OUTPUT_DIR
 
 
 def main(arguments: Namespace) -> None:
@@ -25,6 +25,7 @@ def main(arguments: Namespace) -> None:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
+    parser.add_argument("--out", help="output directory to collect the results", type=str, default=DEFAULT_OUTPUT_DIR)
 
     # system
     parser.add_argument("--strategy", help="type of strategy", type=str, choices=list(STRATEGIES.keys()),
