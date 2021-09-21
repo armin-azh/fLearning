@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 
 from ._base import AbstractNode
 from core.utils import select_users, fed_avg
+from core.models.model_factory import create_model
 from core.normalizer import CIFAR_TRANSFORMER
 
 
@@ -36,7 +37,7 @@ class ServerNode(AbstractNode):
         model_ready = True
         while model_ready:
             msg = bytes(f"{len(msg):<{10}}", 'utf-8') + msg
-            self._socket.sendall(msg)
+            self._conn.sendall(msg)
             model_ready = False
 
     def receive(self, **kwargs):
@@ -44,7 +45,7 @@ class ServerNode(AbstractNode):
         new_msg = True
         full_msg = b''
         while model_ready:
-            msg = self._socket.recv(1024)
+            msg = self._conn.recv(1024)
             if new_msg:
                 msg_len = int(msg[:10])
                 new_msg = False
@@ -55,7 +56,35 @@ class ServerNode(AbstractNode):
                 return pickle.loads(full_msg[10:])
 
     def exec_(self, lock: Lock, **kwargs):
-        pass
+
+        ServerNode.global_model = create_model(name=self._arguments.model_name, device=0)
+
+        self.send(net=ServerNode.global_model)
+
+        for c_round in range(self._arguments.n_round):
+            t1 = time.time()
+            ServerNode.local_models = []
+
+            worker_model = self.receive()
+
+            lock.acquire()
+            ServerNode.local_models.append(worker_model)
+            ServerNode.num_local_models += 1
+            lock.release()
+
+            while True:
+                print(f"[Waiting] Server Thread is Waiting")
+
+                lock.acquire()
+                if ServerNode.release == 1:
+                    lock.release()
+                    break
+                lock.release()
+                time.sleep(1)
+
+            self.send(net=ServerNode.global_model)
+
+        self._socket.close()
 
     @classmethod
     def aggregate(cls, lock: Lock, arguments: Namespace):

@@ -6,7 +6,6 @@ import wide_resnet as wide
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 
-
 model_dict = {
     "WRN10_1": wide.WRN10_1,  # params: 77850 Cifar10: 0.8806
     "WRN16_1": wide.WRN16_1,  # params: 175066 Cifar10: 0.9175
@@ -59,7 +58,7 @@ model_dict = {
     "wrn50_2": vision.wide_resnet50_2,  # params: 66854730
     "wrn101_2": vision.wide_resnet101_2,  # params: 124858186
     # vgg lol
-    "vgg9": cifar10.VGG9,   # params: 6279690     
+    "vgg9": cifar10.VGG9,  # params: 6279690
     "vgg11": cifar10.VGG11,  # params: 9231114
     "vgg13": cifar10.VGG13,  # params: 9416010
     "vgg16": cifar10.VGG16,  # params: 14728266
@@ -68,30 +67,31 @@ model_dict = {
     "cnn": cifar10.CNN
 }
 
+
 def create_model(name, num_classes, device):
     model_cls = model_dict[name]
     # print(f"Building model {name}...", end='')
-    model = model_cls(num_classes=num_classes)    
+    model = model_cls(num_classes=num_classes)
     total_params = sum(p.numel() for p in model.parameters())
     layers = len(list(model.modules()))
     print(f" total parameters: {total_params}, layers {layers}")
-    
+
     # always use dataparallel for now
-    model = torch.nn.DataParallel(model)  
+    model = torch.nn.DataParallel(model)
     device_count = torch.cuda.device_count()
     cudnn.benchmark = True
-    
+
     # # copy to cuda if activated 
     model = model.to(device)
-    
+
     return model
 
 
 if __name__ == "__main__":
     # for model in model_dict.keys():
-    
+
     # model = create_model("resnet8_sm", 10, "cpu")
-    
+
     # print("Model's state_dict:")
     # for param_tensor in model.state_dict():
     #     print(param_tensor, "\t", model.state_dict()[param_tensor].size())
