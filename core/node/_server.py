@@ -10,12 +10,13 @@ class ServerNode(AbstractNode):
         super(ServerNode, self).__init__(*args, **kwargs)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.connect((self._ip, self._port))
+        self._arguments = kwargs["arguments"]
 
     def send(self, **kwargs):
         msg = pickle.dumps(kwargs["net"])
         model_ready = True
         while model_ready:
-            msg = bytes(f"{len(msg):<{10}}", 'utf-8')+msg
+            msg = bytes(f"{len(msg):<{10}}", 'utf-8') + msg
             self._socket.sendall(msg)
             model_ready = False
 
@@ -34,8 +35,9 @@ class ServerNode(AbstractNode):
                 model_ready = False
                 return pickle.loads(full_msg[10:])
 
-    def exec_(self, **kwargs):
+    def exec_(self, lock: Lock, **kwargs):
         pass
 
-    def aggregate(self, lock: Lock, arguments: Namespace):
+    @classmethod
+    def aggregate(cls, lock: Lock):
         pass

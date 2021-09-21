@@ -3,11 +3,8 @@ server:
   type: synchronous
   name: synchronous-service
   ip: 127.0.0.1
-  port: 7070
   nodes:
     client1:
-      ip: 127.0.0.1
-      port: 4040
+      port: 65431
     client2:
-      ip: 127.0.0.1
-      port: 4041
+      port: 65432
