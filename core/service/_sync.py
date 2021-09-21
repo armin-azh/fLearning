@@ -17,7 +17,7 @@ class SyncService(AbstractService):
 
         self._barrier = threading.Barrier(self._n_clients)
         self._server_lock = threading.Lock()
-        t = threading.Thread(target=Server.aggregate, args=(self._server_lock,))
+        t = threading.Thread(target=Server.aggregate, args=(self._server_lock, self._arguments))
         t.start()
 
         for serv in self._servers:
