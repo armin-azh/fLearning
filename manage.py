@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--out", help="output directory to collect the results", type=str, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--config", help="configuration file to build computation service graph", type=str)
 
     # system
     parser.add_argument("--strategy", help="type of strategy", type=str, choices=list(STRATEGIES.keys()),

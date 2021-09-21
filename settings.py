@@ -14,3 +14,8 @@ STRATEGIES = {
 }
 
 DEFAULT_OUTPUT_DIR = 'result'
+
+CONFIG = Path("configuration/service_1.yml")
+
+if not CONFIG.is_absolute():
+    CONFIG = BASE_DIR.joinpath(CONFIG)

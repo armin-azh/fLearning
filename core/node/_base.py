@@ -9,3 +9,25 @@ class AbstractNode:
 
     def receive(self, **kwargs):
         raise NotImplementedError
+
+
+class ServerNode(AbstractNode):
+    def __init__(self, *args, **kwargs):
+        super(ServerNode, self).__init__(*args, **kwargs)
+
+    def send(self):
+        pass
+
+    def receive(self):
+        pass
+
+
+class ClientNode(AbstractNode):
+    def __init__(self, *args, **kwargs):
+        super(ClientNode, self).__init__(*args, **kwargs)
+
+    def send(self):
+        pass
+
+    def receive(self):
+        pass
