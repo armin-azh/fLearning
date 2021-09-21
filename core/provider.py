@@ -9,5 +9,5 @@ def synchronous_service_provider(arguments: Namespace, conf: dict) -> SyncServic
     :param conf:
     :return:
     """
-    service = SyncService.create(conf=conf)
+    service = SyncService.create(conf=conf, arguments=arguments)
     return service

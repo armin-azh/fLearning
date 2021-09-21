@@ -33,6 +33,16 @@ if __name__ == '__main__':
     # system
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=1)
 
+    # local model
+    parser.add_argument("--epochs", help="total number of client epochs", type=int, default=10)
+    parser.add_argument('--frac', default=0.4, type=float, help="the fraction of clients: C")
+    parser.add_argument("--batch_size", help="local model batch size", type=int, default=32)
+    parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)
+    parser.add_argument("--momentum", default=0.9, type=float, help="SGD momentum")
+    parser.add_argument("--weight-decay", default=5e-4, type=float, help="SGD weight decay (default: 5e-4)")
+
+    parser.add_argument("--n_worker", help="number of worker for load dataset", type=int, default=3)
+
     args = parser.parse_args()
 
     main(args)

@@ -1,3 +1,5 @@
+from threading import Lock
+from argparse import Namespace
 from ._base import AbstractNode
 
 
@@ -12,4 +14,7 @@ class ServerNode(AbstractNode):
         pass
 
     def exec_(self, **kwargs):
+        pass
+
+    def aggregate(self, lock: Lock, arguments: Namespace):
         pass
