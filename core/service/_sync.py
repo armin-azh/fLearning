@@ -5,7 +5,7 @@ from ._base import AbstractService
 from core.node import Server, Client
 
 
-class SyncService(AbstractService):
+class SyncServerService(AbstractService):
     def __init__(self, serv_host: str, serv_ports: List[int], *args, **kwargs):
         self._n_clients = len(serv_ports)
         self._serv_host = serv_host
@@ -28,7 +28,7 @@ class SyncService(AbstractService):
         for _ in range(len(self._servers)):
             t.join()
 
-        super(SyncService, self).__init__(name="synchronous-service", type="sync")
+        super(SyncServerService, self).__init__(name="synchronous-service", type="sync")
 
     @classmethod
     def create(cls, **kwargs):
@@ -40,4 +40,4 @@ class SyncService(AbstractService):
 
         serv_ports = [int(p["port"]) for _, p in serv_conf["nodes"].items()]
 
-        return SyncService(serv_host=serv_ip, serv_ports=serv_ports, arguments=arguments)
+        return SyncServerService(serv_host=serv_ip, serv_ports=serv_ports, arguments=arguments)
