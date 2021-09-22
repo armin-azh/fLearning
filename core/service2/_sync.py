@@ -3,6 +3,7 @@ import threading
 
 from ._base import AbstractService
 from core.node2 import Server, Client
+from core.models.model_factory import create_model
 
 
 class ServerSyncService(AbstractService):
@@ -18,6 +19,7 @@ class ServerSyncService(AbstractService):
         self._barrier = threading.Barrier(self._total_n_clients)
         self._serv_lock = threading.Lock()
         Server.total_n_worker = self._total_n_clients
+        Server.global_model = create_model(name=self._model_name, num_classes=self._n_classes, device=0)
         t = threading.Thread(target=Server.aggregate, args=(self._serv_lock, self._n_round))
         t.start()
 
@@ -25,7 +27,8 @@ class ServerSyncService(AbstractService):
                          enumerate(self._serv_ports)]
         for serv in self._servers:
             t = threading.Thread(target=serv.exec_,
-                                 args=(self._serv_lock, self._barrier, self._model_name, self._n_classes,self._n_round))
+                                 args=(
+                                     self._serv_lock, self._barrier, self._n_round))
             t.start()
 
         for _ in range(self._total_n_clients):

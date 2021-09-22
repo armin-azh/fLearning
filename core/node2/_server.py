@@ -51,11 +51,8 @@ class ServerNode(AbstractNode):
                 model_ready = False
                 return pickle.loads(full_msg[10:])
 
-    def exec_(self, lock: Lock, barrier: Barrier, model_name: str, n_classes: int, n_round: int, **kwargs):
+    def exec_(self, lock: Lock, barrier: Barrier, n_round: int, **kwargs):
         self.connect()
-
-        if ServerNode.global_model is None:
-            ServerNode.global_model = create_model(name=model_name, num_classes=n_classes, device=0)
 
         # send model to the client
         self.send(net=ServerNode.global_model)
