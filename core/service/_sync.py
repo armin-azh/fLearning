@@ -28,7 +28,7 @@ class SyncServerService(AbstractService):
         for _ in range(len(self._servers)):
             t.join()
 
-        super(SyncServerService, self).__init__(name="synchronous-service", type="sync")
+        super(SyncServerService, self).__init__(name="synchronous-server-service", type="sync")
 
     @classmethod
     def create(cls, **kwargs):
@@ -41,3 +41,15 @@ class SyncServerService(AbstractService):
         serv_ports = [int(p["port"]) for _, p in serv_conf["nodes"].items()]
 
         return SyncServerService(serv_host=serv_ip, serv_ports=serv_ports, arguments=arguments)
+
+
+class SyncClientService(AbstractService):
+    def __init__(self, serv_host: str, serv_port: int, client_id: str, *args, **kwargs):
+        self._arguments = kwargs["arguments"]
+        self._client = Client(ip=serv_host, port=serv_port)
+        super(SyncClientService, self).__init__(name=f"{client_id}-synchronous-service", type="sync")
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        conf = kwargs["conf"]
+        arguments = kwargs["arguments"]

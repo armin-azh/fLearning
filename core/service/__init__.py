@@ -1,3 +1,4 @@
-from ._sync import SyncServerService
+from ._sync import SyncServerService, SyncClientService
 
 SyncServerService = SyncServerService
+SyncClientService = SyncClientService
