@@ -1,6 +1,6 @@
 import threading
-from .service2 import ServerSyncService
-from .service2 import ClientSyncService
+from .service import ServerSyncService
+from .service import ClientSyncService
 from argparse import Namespace
 
 

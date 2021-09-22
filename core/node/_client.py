@@ -1,9 +1,10 @@
 import socket
 import pickle
-from ._base import AbstractNode
-from core.trainer import ClientTrainer
 
 from torch.optim import SGD
+
+from ._base import AbstractNode
+from core.trainer import ClientTrainer
 
 
 class ClientNode(AbstractNode):
@@ -11,7 +12,6 @@ class ClientNode(AbstractNode):
         super(ClientNode, self).__init__(*args, **kwargs)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.connect((self._ip, self._port))
-        self._arguments = kwargs["arguments"]
 
     def send(self, **kwargs):
         msg = pickle.dumps(kwargs["net"])
@@ -37,12 +37,11 @@ class ClientNode(AbstractNode):
                 return pickle.loads(full_msg[10:])
 
     def exec_(self, **kwargs):
-
-        for c_round in range(self._arguments.n_round):
-            print(f"[Client] on round {c_round}")
-
+        n_round = kwargs["n_round"]
+        for c_round in range(n_round):
+            print(f"[{self._id}] on round {c_round}")
             net = self.receive()
-            print(f"[Client] had received Net")
+            print(f"[{self._id}] had received Net")
 
             opt_conf = {
                 "lr": kwargs["lr"],
@@ -51,3 +50,4 @@ class ClientNode(AbstractNode):
             }
 
             trainer = ClientTrainer(net=net, opt=SGD, opt_config=opt_conf)
+            trainer.train(epochs=kwargs["epochs"], train_loader=kwargs["train_loader"], device=kwargs["device"])

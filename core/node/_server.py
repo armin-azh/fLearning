@@ -1,36 +1,32 @@
 import time
-import copy
-from threading import Lock
-from argparse import Namespace
-import pickle
 import socket
-
-import torch
-import torchvision
-from torch.utils.data import DataLoader
-
+import pickle
+from threading import Lock, Barrier
+from argparse import Namespace
 from ._base import AbstractNode
-from core.utils import select_users, fed_avg
 from core.models.model_factory import create_model
-from core.normalizer import CIFAR_TRANSFORMER
 
 
 class ServerNode(AbstractNode):
-    num_local_models = 0
     local_models = []
-    total_workers = 10
-    global_model = 0
+    global_model = None
+    n_local_models = 0
+    total_n_worker = 0
     release = 0
 
     def __init__(self, *args, **kwargs):
         super(ServerNode, self).__init__(*args, **kwargs)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._conn = None
         self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    def connect(self):
+        print(f"[{self._id}] is on the thread ...")
+        print(f"[{self._id}] is listening on the {self._ip}:{self._port}")
         self._socket.bind((self._ip, self._port))
         self._socket.listen()
-
         self._conn, _ = self._socket.accept()
-        self._arguments = kwargs["arguments"]
+        print(f"[{self._id}] client connected on the {self._ip}:{self._port}")
 
     def send(self, **kwargs):
         msg = pickle.dumps(kwargs["net"])
@@ -55,25 +51,27 @@ class ServerNode(AbstractNode):
                 model_ready = False
                 return pickle.loads(full_msg[10:])
 
-    def exec_(self, lock: Lock, **kwargs):
+    def exec_(self, lock: Lock, barrier: Barrier, n_round: int, **kwargs):
+        self.connect()
 
-        ServerNode.global_model = create_model(name=self._arguments.model_name, device=0)
-
+        # send model to the client
         self.send(net=ServerNode.global_model)
 
-        for c_round in range(self._arguments.n_round):
-            t1 = time.time()
+        for c_round in range(n_round):
+
             ServerNode.local_models = []
 
-            worker_model = self.receive()
+            client_model = self.receive()  # receive model from client
 
+            # update global variable
             lock.acquire()
-            ServerNode.local_models.append(worker_model)
-            ServerNode.num_local_models += 1
+            ServerNode.local_models.append(client_model)
+            ServerNode.n_local_models += 1
             lock.release()
 
+            # waiting for aggregating
             while True:
-                print(f"[Waiting] Server Thread is Waiting")
+                print(f"[{self._id}] is waiting for aggregating model")
 
                 lock.acquire()
                 if ServerNode.release == 1:
@@ -83,46 +81,30 @@ class ServerNode(AbstractNode):
                 time.sleep(1)
 
             self.send(net=ServerNode.global_model)
+            barrier.wait()
+            ServerNode.release = 0
 
+        # close socket
         self._socket.close()
-
     @classmethod
-    def aggregate(cls, lock: Lock, arguments: Namespace):
+    def aggregate(cls, lock: Lock, n_round: int, *args, **kwargs):
 
-        for c_round in range(arguments.n_round):
+        for c_round in range(n_round):
 
+            # check all worker are arrived
             while True:
-                print(f"[Waiting] For a worker")
-                print(f"locals: {cls.num_local_models}, total: {cls.total_workers}")
+                print(f"[Accumulator] Waiting for clients")
+                print(f"locals: {cls.n_local_models}, total: {cls.total_n_worker}")
                 lock.acquire()
-
-                if cls.total_workers == cls.num_local_models:
-                    cls.num_local_models = 0
+                if cls.total_n_worker == cls.n_local_models:
+                    cls.n_local_models = 0
                     break
-
                 lock.release()
                 time.sleep(1)
 
-            part_users = select_users(n_users=cls.total_workers, frac=arguments.frac, seed=arguments.seed)
+            # Do something
 
-            all_weights = []
-            edge_models = []
+            # release the sources
 
-            for i, model in enumerate(cls.local_models):
-                if i in part_users:
-                    w = model.state_dict()
-                    edge_models.append(model)
-                    all_weights.append(copy.deepcopy(w))
-
-            averaged_weights = fed_avg(all_weights)
-            cls.global_model.load_state_dict(averaged_weights)
-
-            test_set = torchvision.datasets.CIFAR10(root='./data',
-                                                    train=False,
-                                                    download=True,
-                                                    transform=CIFAR_TRANSFORMER)
-
-            test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=arguments.n_worker)
-
-            cls.release = 1
             lock.release()
+            cls.release = 1
