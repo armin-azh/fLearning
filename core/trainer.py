@@ -76,3 +76,7 @@ class ClientTrainer(AbstractTrainer):
         for epoch in range(epochs):
             self.train_step(epoch=epoch, epochs=kwargs["epochs"], train_loader=kwargs["train_loader"],
                             device=kwargs["device"])
+
+    @property
+    def get_net(self):
+        return self._net

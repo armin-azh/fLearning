@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
 
     # system
-    parser.add_argument("--n_round", help="Number of rounds", type=int, default=1)
+    parser.add_argument("--n_round", help="Number of rounds", type=int, default=2)
 
     # local model
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])

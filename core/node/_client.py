@@ -51,3 +51,4 @@ class ClientNode(AbstractNode):
 
             trainer = ClientTrainer(net=net, opt=SGD, opt_config=opt_conf)
             trainer.train(epochs=kwargs["epochs"], train_loader=kwargs["train_loader"], device=kwargs["device"])
+            self.send(net=trainer.get_net)

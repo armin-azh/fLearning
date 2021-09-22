@@ -1,10 +1,11 @@
+import copy
 import time
 import socket
 import pickle
 from threading import Lock, Barrier
 from argparse import Namespace
 from ._base import AbstractNode
-from core.models.model_factory import create_model
+from core.utils import fed_avg
 
 
 class ServerNode(AbstractNode):
@@ -86,6 +87,7 @@ class ServerNode(AbstractNode):
 
         # close socket
         self._socket.close()
+
     @classmethod
     def aggregate(cls, lock: Lock, n_round: int, *args, **kwargs):
 
@@ -103,7 +105,15 @@ class ServerNode(AbstractNode):
                 time.sleep(1)
 
             # Do something
+            all_weights = []
 
+            for i, model in enumerate(cls.local_models):
+                w = model.state_dict()
+                all_weights.append(copy.deepcopy(w))
+            print("[Accumulator] Collected weights")
+
+            avg_weights = fed_avg(all_weights)
+            cls.global_model.load_state_dict(avg_weights)
             # release the sources
 
             lock.release()
