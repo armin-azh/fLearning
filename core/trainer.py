@@ -43,13 +43,11 @@ class ClientTrainer(AbstractTrainer):
         train_loader_size = len(train_loader.dataset)
         n_batches = len(train_loader)
         device = kwargs["device"]
-        c_round = kwargs["c_round"]
-        n_round = kwargs["n_round"]
         epoch = kwargs["epoch"]
         epochs = kwargs["epochs"]
 
-        total_correct = 0.0
-        total_loss = 0.0
+        total_acc = []
+        total_loss = []
 
         for batch_idx, (x, y) in enumerate(train_loader):
             x = x.to(device, non_blocking=True)
@@ -59,13 +57,15 @@ class ClientTrainer(AbstractTrainer):
             y_hat, loss = self._calculate_loss(x, y)
 
             pred = y_hat.data.max(1, keepdim=True)[1]
-            total_correct += pred.eq(y.data.view_as(pred)).sum()
-            total_loss += loss
-            curr_acc = 100.0 * (total_correct / float(train_loader_size))
-            curr_loss = (total_loss / float(batch_idx))
+            total_correct = pred.eq(y.data.view_as(pred)).sum()
+            curr_acc = total_correct / float(len(x))
 
-            print(
-                f"Round:[{c_round + 1}/{n_round}] | Epoch:[{epoch + 1}/{epochs}] | Batch:[{batch_idx + 1}/{n_batches}] Acc: {curr_acc}, Loss: {curr_loss}")
+            total_acc.append(curr_acc)
+            total_loss.append(loss)
+
+            if batch_idx % 100 == 0:
+                print(
+                    f"Epoch:[{epoch + 1}/{epochs}] | Batch:[{batch_idx + 1}/{n_batches}] Acc: {curr_acc}, Loss: {loss}")
 
     def valid_step(self, *args, **kwargs):
         pass
@@ -74,4 +74,5 @@ class ClientTrainer(AbstractTrainer):
         epochs = kwargs["epochs"]
 
         for epoch in range(epochs):
-            self.train_step(epoch=epoch, **kwargs)
+            self.train_step(epoch=epoch, epochs=kwargs["epochs"], train_loader=kwargs["train_loader"],
+                            device=kwargs["device"])

@@ -1,6 +1,9 @@
 import socket
 import pickle
 from ._base import AbstractNode
+from core.trainer import ClientTrainer
+
+from torch.optim import SGD
 
 
 class ClientNode(AbstractNode):
@@ -14,7 +17,7 @@ class ClientNode(AbstractNode):
         msg = pickle.dumps(kwargs["net"])
         model_ready = True
         while model_ready:
-            msg = bytes(f"{len(msg):<{10}}", 'utf-8')+msg
+            msg = bytes(f"{len(msg):<{10}}", 'utf-8') + msg
             self._socket.sendall(msg)
             model_ready = False
 
@@ -40,3 +43,11 @@ class ClientNode(AbstractNode):
 
             net = self.receive()
             print(f"[Client] had received Net")
+
+            opt_conf = {
+                "lr": kwargs["lr"],
+                "momentum": kwargs["momentum"],
+                "weight_decay": kwargs["weight_decay"]
+            }
+
+            trainer = ClientTrainer(net=net, opt=SGD, opt_config=opt_conf)

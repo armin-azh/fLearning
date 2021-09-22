@@ -4,6 +4,7 @@ import threading
 from ._base import AbstractService
 from core.node2 import Server, Client
 from core.models.model_factory import create_model
+from core.loader import get_cifar, get_loaders
 
 
 class ServerSyncService(AbstractService):
@@ -15,6 +16,9 @@ class ServerSyncService(AbstractService):
         self._serv_host = serv_host
         self._serv_ports = serv_ports
         self._total_n_clients = len(self._serv_ports)
+
+        # train data
+        train_dataset, test_dataset = get_cifar(self._n_classes)
 
         self._barrier = threading.Barrier(self._total_n_clients)
         self._serv_lock = threading.Lock()
@@ -39,7 +43,27 @@ class ClientSyncService(AbstractService):
     def __init__(self, serv_host: str, serv_port: int, client_id: str, *args, **kwargs):
         super(ClientSyncService, self).__init__(name=f"{client_id}-sync-service", type="sync")
         self._n_round = kwargs["n_round"]
+        self._n_classes = kwargs["n_classes"]
+        self._n_clients = kwargs["n_clients"]
         self._serv_host = serv_host
         self._serv_port = serv_port
+
+        train_dataset, test_dataset = get_cifar(self._n_classes)
+        client_loaders, test_loader = get_loaders(train_dataset,
+                                                  test_dataset,
+                                                  n_clients=self._n_clients,
+                                                  alpha=kwargs["alpha"],
+                                                  batch_size=kwargs["batch_size"],
+                                                  n_data=None,
+                                                  num_workers=kwargs["n_worker"],
+                                                  seed=kwargs["random_seed"], )
+        print(test_loader)
         self._client = Client(ip=self._serv_host, port=self._serv_port, name=client_id)
-        self._client.exec_(n_round=self._n_round)
+        self._client.exec_(n_round=self._n_round,
+                           lr=kwargs["lr"],
+                           momentum=kwargs["momentum"],
+                           weight_decay=kwargs["weight_decay"],
+                           device=0,
+                           train_loader=client_loaders[kwargs["loader_idx"]],
+                           epochs=kwargs["epochs"],
+                           )

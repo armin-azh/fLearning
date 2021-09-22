@@ -1,6 +1,10 @@
 import socket
 import pickle
+
+from torch.optim import SGD
+
 from ._base import AbstractNode
+from core.trainer import ClientTrainer
 
 
 class ClientNode(AbstractNode):
@@ -38,5 +42,12 @@ class ClientNode(AbstractNode):
             print(f"[{self._id}] on round {c_round}")
             net = self.receive()
             print(f"[{self._id}] had received Net")
-            print(net)
 
+            opt_conf = {
+                "lr": kwargs["lr"],
+                "momentum": kwargs["momentum"],
+                "weight_decay": kwargs["weight_decay"]
+            }
+
+            trainer = ClientTrainer(net=net, opt=SGD, opt_config=opt_conf)
+            trainer.train(epochs=kwargs["epochs"], train_loader=kwargs["train_loader"], device=kwargs["device"])

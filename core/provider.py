@@ -34,5 +34,16 @@ def sync_client_service_provider(arguments: Namespace, conf: dict) -> ClientSync
     service = ClientSyncService(serv_host=serv_host,
                                 serv_port=serv_port,
                                 client_id=arguments.client_node,
-                                n_round=arguments.n_round)
+                                n_round=arguments.n_round,
+                                lr=arguments.lr,
+                                momentum=arguments.momentum,
+                                weight_decay=arguments.weight_decay,
+                                n_classes=arguments.n_classes,
+                                n_clients=len(list(conf["server"]["nodes"].keys())),
+                                alpha=arguments.alpha,
+                                n_worker=arguments.n_worker,
+                                random_seed=arguments.seed,
+                                batch_size=arguments.batch_size,
+                                loader_idx=arguments.client_loader,
+                                epochs=arguments.epochs)
     return service
