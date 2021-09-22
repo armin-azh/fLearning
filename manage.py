@@ -36,7 +36,6 @@ if __name__ == '__main__':
     parser.add_argument("--mode", help="server or client node", type=str, default="server",
                         choices=["server", "client"])
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
-    parser.add_argument("--out", help="output directory to collect the results", type=str, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--client_node", help="connect the client node", type=str, default="")
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
 
