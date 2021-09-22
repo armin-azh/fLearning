@@ -8,7 +8,8 @@ from argparse import Namespace
 
 from settings import STRATEGIES, DEFAULT_OUTPUT_DIR, CONFIG
 from core.utils import read_yaml_file
-from core.provider import synchronous_service_provider
+from core.provider import (sync_server_service_provider,
+                           sync_client_service_provider)
 
 
 def main(arguments: Namespace) -> None:
@@ -16,7 +17,12 @@ def main(arguments: Namespace) -> None:
     strategy = parsed_config["server"]["type"]
 
     if strategy == "synchronous":
-        service = synchronous_service_provider(arguments=arguments, conf=parsed_config)
+        if arguments.mode == "server":
+            service = sync_server_service_provider(arguments=arguments, conf=parsed_config)
+        elif arguments.mode == "client":
+            service = sync_client_service_provider(arguments=arguments, conf=parsed_config)
+        else:
+            print('[Failed] Wrong mode')
     elif strategy == "asynchronous":
         pass
     elif strategy == "semi-synchronous":
