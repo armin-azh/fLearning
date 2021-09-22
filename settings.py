@@ -17,6 +17,7 @@ DEFAULT_OUTPUT_DIR = Path('result')
 if not DEFAULT_OUTPUT_DIR.is_absolute():
     DEFAULT_OUTPUT_DIR = BASE_DIR.joinpath(DEFAULT_OUTPUT_DIR)
 DEFAULT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 CONFIG = Path("configuration/service_1.yml")
 
 if not CONFIG.is_absolute():

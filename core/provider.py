@@ -1,7 +1,9 @@
-import threading
+from datetime import datetime
 from .service import ServerSyncService
 from .service import ClientSyncService
 from argparse import Namespace
+
+from settings import DEFAULT_OUTPUT_DIR
 
 
 def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSyncService:
@@ -14,11 +16,17 @@ def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSync
     serv_host = conf["server"]["ip"]
     serv_ports = [int(p["port"]) for p in conf["server"]["nodes"].values()]
 
+    _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
+
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("server").joinpath("synchronous").joinpath(_cu)
+    save_path.mkdir(exist_ok=True, parents=True)
+
     service = ServerSyncService(serv_host=serv_host,
                                 serv_ports=serv_ports,
                                 n_round=arguments.n_round,
                                 model_name=arguments.model_name,
-                                n_classes=arguments.n_classes)
+                                n_classes=arguments.n_classes,
+                                save_path=save_path)
     return service
 
 

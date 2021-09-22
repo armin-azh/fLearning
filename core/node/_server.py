@@ -2,10 +2,12 @@ import copy
 import time
 import socket
 import pickle
+from pathlib import Path
 from threading import Lock, Barrier
 from argparse import Namespace
 from ._base import AbstractNode
 from core.utils import fed_avg
+import torch
 
 
 class ServerNode(AbstractNode):
@@ -89,7 +91,9 @@ class ServerNode(AbstractNode):
         self._socket.close()
 
     @classmethod
-    def aggregate(cls, lock: Lock, n_round: int, *args, **kwargs):
+    def aggregate(cls, lock: Lock, n_round: int, save_path: Path, *args, **kwargs):
+        model_path = save_path.joinpath("model")
+        model_path.mkdir(exist_ok=True,parents=True)
 
         for c_round in range(n_round):
 
@@ -116,5 +120,9 @@ class ServerNode(AbstractNode):
             cls.global_model.load_state_dict(avg_weights)
             # release the sources
 
+            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"round_{c_round+1}.pth")))
+
             lock.release()
             cls.release = 1
+
+
