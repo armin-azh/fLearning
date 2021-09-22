@@ -1,5 +1,6 @@
 import time
 import socket
+import pickle
 from threading import Lock, Barrier
 from argparse import Namespace
 from ._base import AbstractNode
@@ -27,20 +28,67 @@ class ServerNode(AbstractNode):
         self._conn, _ = self._socket.accept()
         print(f"[{self._id}] client connected on the {self._ip}:{self._port}")
 
-    def send(self):
-        pass
+    def send(self, **kwargs):
+        msg = pickle.dumps(kwargs["net"])
+        model_ready = True
+        while model_ready:
+            msg = bytes(f"{len(msg):<{10}}", 'utf-8') + msg
+            self._conn.sendall(msg)
+            model_ready = False
 
     def receive(self, **kwargs):
-        pass
+        model_ready = True
+        new_msg = True
+        full_msg = b''
+        while model_ready:
+            msg = self._conn.recv(1024)
+            if new_msg:
+                msg_len = int(msg[:10])
+                new_msg = False
+            full_msg += msg
+            if len(full_msg) - 10 == msg_len:
+                new_msg = True
+                model_ready = False
+                return pickle.loads(full_msg[10:])
 
-    def exec_(self, lock: Lock, barrier: Barrier, model_name: str, n_classes: int, **kwargs):
+    def exec_(self, lock: Lock, barrier: Barrier, model_name: str, n_classes: int, n_round: int, **kwargs):
         self.connect()
 
         if ServerNode.global_model is None:
             ServerNode.global_model = create_model(name=model_name, num_classes=n_classes, device=0)
 
-        barrier.wait()
+        # send model to the client
+        self.send(net=ServerNode.global_model)
 
+        for c_round in range(n_round):
+
+            ServerNode.local_models = []
+
+            client_model = self.receive()  # receive model from client
+
+            # update global variable
+            lock.acquire()
+            ServerNode.local_models.append(client_model)
+            ServerNode.n_local_models += 1
+            lock.release()
+
+            # waiting for aggregating
+            while True:
+                print(f"[{self._id}] is waiting for aggregating model")
+
+                lock.acquire()
+                if ServerNode.release == 1:
+                    lock.release()
+                    break
+                lock.release()
+                time.sleep(1)
+
+            self.send(net=ServerNode.global_model)
+            barrier.wait()
+            ServerNode.release = 0
+
+        # close socket
+        self._socket.close()
     @classmethod
     def aggregate(cls, lock: Lock, n_round: int, *args, **kwargs):
 

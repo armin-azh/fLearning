@@ -25,7 +25,7 @@ class ServerSyncService(AbstractService):
                          enumerate(self._serv_ports)]
         for serv in self._servers:
             t = threading.Thread(target=serv.exec_,
-                                 args=(self._serv_lock, self._barrier, self._model_name, self._n_classes))
+                                 args=(self._serv_lock, self._barrier, self._model_name, self._n_classes,self._n_round))
             t.start()
 
         for _ in range(self._total_n_clients):

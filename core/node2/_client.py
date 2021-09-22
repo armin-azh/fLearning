@@ -38,4 +38,5 @@ class ClientNode(AbstractNode):
             print(f"[{self._id}] on round {c_round}")
             net = self.receive()
             print(f"[{self._id}] had received Net")
+            print(net)
 
