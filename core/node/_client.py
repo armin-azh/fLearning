@@ -8,6 +8,7 @@ class ClientNode(AbstractNode):
         super(ClientNode, self).__init__(*args, **kwargs)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.connect((self._ip, self._port))
+        self._arguments = kwargs["arguments"]
 
     def send(self, **kwargs):
         msg = pickle.dumps(kwargs["net"])
@@ -33,4 +34,9 @@ class ClientNode(AbstractNode):
                 return pickle.loads(full_msg[10:])
 
     def exec_(self, **kwargs):
-        pass
+
+        for c_round in range(self._arguments.n_round):
+            print(f"[Client] on round {c_round}")
+
+            net = self.receive()
+            print(f"[Client] had received Net")
