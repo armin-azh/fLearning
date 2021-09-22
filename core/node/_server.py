@@ -93,6 +93,7 @@ class ServerNode(AbstractNode):
 
             while True:
                 print(f"[Waiting] For a worker")
+                print(f"locals: {cls.num_local_models}, total: {cls.total_workers}")
                 lock.acquire()
 
                 if cls.total_workers == cls.num_local_models:

@@ -14,7 +14,11 @@ def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSync
     serv_host = conf["server"]["ip"]
     serv_ports = [int(p["port"]) for p in conf["server"]["nodes"].values()]
 
-    service = ServerSyncService(serv_host=serv_host, serv_ports=serv_ports, n_round=arguments.n_round)
+    service = ServerSyncService(serv_host=serv_host,
+                                serv_ports=serv_ports,
+                                n_round=arguments.n_round,
+                                model_name=arguments.model_name,
+                                n_classes=arguments.n_classes)
     return service
 
 

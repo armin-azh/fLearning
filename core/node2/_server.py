@@ -3,6 +3,7 @@ import socket
 from threading import Lock, Barrier
 from argparse import Namespace
 from ._base import AbstractNode
+from core.models.model_factory import create_model
 
 
 class ServerNode(AbstractNode):
@@ -32,8 +33,11 @@ class ServerNode(AbstractNode):
     def receive(self, **kwargs):
         pass
 
-    def exec_(self, lock: Lock, barrier: Barrier, **kwargs):
+    def exec_(self, lock: Lock, barrier: Barrier, model_name: str, n_classes: int, **kwargs):
         self.connect()
+
+        if ServerNode.global_model is None:
+            ServerNode.global_model = create_model(name=model_name, num_classes=n_classes, device=0)
 
         barrier.wait()
 
@@ -45,6 +49,7 @@ class ServerNode(AbstractNode):
             # check all worker are arrived
             while True:
                 print(f"[Accumulator] Waiting for clients")
+                print(f"locals: {cls.n_local_models}, total: {cls.total_n_worker}")
                 lock.acquire()
                 if cls.total_n_worker == cls.n_local_models:
                     cls.n_local_models = 0
