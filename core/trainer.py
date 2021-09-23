@@ -43,7 +43,6 @@ class ClientTrainer(AbstractTrainer):
         self._net.train()
 
         train_loader = kwargs["train_loader"]
-        train_loader_size = len(train_loader.dataset)
         n_batches = len(train_loader)
         device = kwargs["device"]
         epoch = kwargs["epoch"]
@@ -70,15 +69,23 @@ class ClientTrainer(AbstractTrainer):
                 print(
                     f"Epoch:[{epoch + 1}/{epochs}] | Batch:[{batch_idx + 1}/{n_batches}] Acc: {curr_acc}, Loss: {loss}")
 
+        return total_acc, total_loss
+
     def valid_step(self, *args, **kwargs):
         pass
 
     def train(self, *args, **kwargs):
         epochs = kwargs["epochs"]
-
+        epochs_acc, epochs_loss = [], []
         for epoch in range(epochs):
-            self.train_step(epoch=epoch, epochs=kwargs["epochs"], train_loader=kwargs["train_loader"],
-                            device=kwargs["device"])
+            epoch_acc, epoch_loss = self.train_step(epoch=epoch, epochs=kwargs["epochs"],
+                                                    train_loader=kwargs["train_loader"],
+                                                    device=kwargs["device"])
+
+            epochs_acc.append(epoch_acc)
+            epochs_loss.append(epoch_loss)
+
+        return epochs_acc, epochs_loss
 
     @property
     def get_net(self):

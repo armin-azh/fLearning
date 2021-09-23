@@ -1,5 +1,7 @@
 import socket
 import pickle
+import numpy as np
+from pathlib import Path
 
 from torch.optim import SGD
 
@@ -36,8 +38,9 @@ class ClientNode(AbstractNode):
                 model_ready = False
                 return pickle.loads(full_msg[10:])
 
-    def exec_(self, **kwargs):
+    def exec_(self, save_path: Path, **kwargs):
         n_round = kwargs["n_round"]
+        rounds_acc, rounds_loss = [], []
         for c_round in range(n_round):
             print(f"[{self._id}] on round {c_round}")
             net = self.receive()
@@ -50,5 +53,12 @@ class ClientNode(AbstractNode):
             }
 
             trainer = ClientTrainer(net=net, opt=SGD, opt_config=opt_conf)
-            trainer.train(epochs=kwargs["epochs"], train_loader=kwargs["train_loader"], device=kwargs["device"])
+            round_acc, round_loss = trainer.train(epochs=kwargs["epochs"],
+                                                  train_loader=kwargs["train_loader"],
+                                                  device=kwargs["device"])
+            rounds_acc.append(round_acc)
+            rounds_loss.append(round_loss)
             self.send(net=trainer.get_net)
+
+        np.save(str(save_path.joinpath(f"{self._id}_acc.npy")), rounds_acc)
+        np.save(str(save_path.joinpath(f"{self._id}_loss.npy")), rounds_loss)

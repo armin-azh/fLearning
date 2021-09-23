@@ -62,5 +62,6 @@ def sync_client_service_provider(arguments: Namespace, conf: dict) -> ClientSync
                                 random_seed=arguments.seed,
                                 batch_size=arguments.batch_size,
                                 loader_idx=arguments.client_loader,
-                                epochs=arguments.epochs)
+                                epochs=arguments.epochs,
+                                save_path=save_path)
     return service

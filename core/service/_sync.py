@@ -19,9 +19,6 @@ class ServerSyncService(AbstractService):
         self._serv_ports = serv_ports
         self._total_n_clients = len(self._serv_ports)
 
-        # train data
-        train_dataset, test_dataset = get_cifar(self._n_classes)
-
         self._barrier = threading.Barrier(self._total_n_clients)
         self._serv_lock = threading.Lock()
         Server.total_n_worker = self._total_n_clients
@@ -42,7 +39,7 @@ class ServerSyncService(AbstractService):
 
 
 class ClientSyncService(AbstractService):
-    def __init__(self, serv_host: str, serv_port: int, client_id: str, *args, **kwargs):
+    def __init__(self, serv_host: str, serv_port: int, client_id: str, save_path: Path, *args, **kwargs):
         super(ClientSyncService, self).__init__(name=f"{client_id}-sync-service", type="sync")
         self._n_round = kwargs["n_round"]
         self._n_classes = kwargs["n_classes"]
@@ -59,7 +56,7 @@ class ClientSyncService(AbstractService):
                                                   n_data=None,
                                                   num_workers=kwargs["n_worker"],
                                                   seed=kwargs["random_seed"], )
-        print(test_loader)
+
         self._client = Client(ip=self._serv_host, port=self._serv_port, name=client_id)
         self._client.exec_(n_round=self._n_round,
                            lr=kwargs["lr"],
