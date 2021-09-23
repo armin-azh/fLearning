@@ -103,6 +103,6 @@ def eval_global_model(net, test_loader):
             total += labels.size(0)
             test_correct += np.sum(prediction[1].cpu().numpy() == labels.cpu().numpy())
 
-        acc = (float(test_correct) / total) * 100
+        acc = float(test_correct) / total
 
-        return acc, loss
+        return acc, loss.cpu()

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="debug")
 
     # system
-    parser.add_argument("--n_round", help="Number of rounds", type=int, default=2)
+    parser.add_argument("--n_round", help="Number of rounds", type=int, default=1)
 
     # local model
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])

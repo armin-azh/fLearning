@@ -22,7 +22,7 @@ def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSync
     save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name)
     save_path.mkdir(exist_ok=True, parents=True)
 
-    save_parameters(vars(arguments), save_path.joinpath("parameters.txt"))
+    save_parameters(vars(arguments), save_path.joinpath("glob_parameters.txt"))
 
     service = ServerSyncService(serv_host=serv_host,
                                 serv_ports=serv_ports,
@@ -47,8 +47,6 @@ def sync_client_service_provider(arguments: Namespace, conf: dict) -> ClientSync
 
     save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name)
     save_path.mkdir(exist_ok=True, parents=True)
-
-    save_parameters(vars(arguments), save_path.joinpath("parameters.txt"))
 
     service = ClientSyncService(serv_host=serv_host,
                                 serv_port=serv_port,

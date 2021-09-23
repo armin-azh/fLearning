@@ -34,7 +34,7 @@ class ServerSyncService(AbstractService):
         for serv in self._servers:
             t = threading.Thread(target=serv.exec_,
                                  args=(
-                                     self._serv_lock, self._barrier, self._n_round))
+                                     self._serv_lock, self._barrier, self._n_round, save_path))
             t.start()
 
         for _ in range(self._total_n_clients):

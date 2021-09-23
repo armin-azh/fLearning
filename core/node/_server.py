@@ -4,7 +4,9 @@ import socket
 import pickle
 from pathlib import Path
 from threading import Lock, Barrier
-from argparse import Namespace
+
+import numpy as np
+
 from ._base import AbstractNode
 from core.utils import fed_avg
 from core.trainer import eval_global_model
@@ -59,13 +61,17 @@ class ServerNode(AbstractNode):
                 model_ready = False
                 return pickle.loads(full_msg[10:])
 
-    def exec_(self, lock: Lock, barrier: Barrier, n_round: int, **kwargs):
+    def exec_(self, lock: Lock, barrier: Barrier, n_round: int, save_path: Path, **kwargs):
         self.connect()
 
         # send model to the client
         self.send(net=ServerNode.global_model)
 
+        time_cont = []
+
         for c_round in range(n_round):
+
+            s_time = time.time()
 
             ServerNode.local_models = []
 
@@ -88,7 +94,12 @@ class ServerNode(AbstractNode):
                 lock.release()
                 time.sleep(1)
 
+            e_time = time.time() - s_time
+            time_cont.append(int(e_time))
+            print(f"[{self._id}] Took {e_time} sec")
+            np.save(str(save_path.joinpath(f"{self._id}_round_times.npy")), np.array(time_cont))
             self.send(net=ServerNode.global_model)
+
             barrier.wait()
             ServerNode.release = 0
 
@@ -139,7 +150,13 @@ class ServerNode(AbstractNode):
             val_glob_acc_cont.append(val_glob_acc)
             val_glob_loss_cont.append(val_glob_loss)
 
-            print(f"[Accumulator] Round[{c_round}/{n_round}] | Val Acc: {val_glob_acc}, Val Loss: {val_glob_loss}")
+            print(f"[Accumulator] Round[{c_round + 1}/{n_round}] | Val Acc: {val_glob_acc}, Val Loss: {val_glob_loss}")
 
             lock.release()
             cls.release = 1
+
+        # save values
+        np.save(str(save_path.joinpath("val_glob_acc.npy")), np.array(val_glob_acc_cont))
+        np.save(str(save_path.joinpath("val_glob_loss.npy")), np.array(val_glob_loss_cont))
+        
+        time.sleep(2)
