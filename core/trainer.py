@@ -1,5 +1,8 @@
 from torch import nn
 from torch import Tensor
+import torch
+
+import numpy as np
 
 
 class AbstractTrainer:
@@ -80,3 +83,26 @@ class ClientTrainer(AbstractTrainer):
     @property
     def get_net(self):
         return self._net
+
+
+def eval_global_model(net, test_loader):
+    net.eval()
+    device = torch.device('cuda')
+    criterion = nn.CrossEntropyLoss()
+
+    with torch.no_grad():
+        test_correct = 0
+        total = 0
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            output = net(images)
+            loss = criterion(output, labels)
+
+            prediction = torch.max(output, 1)
+            total += labels.size(0)
+            test_correct += np.sum(prediction[1].cpu().numpy() == labels.cpu().numpy())
+
+        acc = (float(test_correct) / total) * 100
+
+        return acc, loss

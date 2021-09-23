@@ -7,7 +7,12 @@ from threading import Lock, Barrier
 from argparse import Namespace
 from ._base import AbstractNode
 from core.utils import fed_avg
+from core.trainer import eval_global_model
+from core.normalizer import CIFAR_TRANSFORMER
+
 import torch
+import torchvision
+from torch.utils.data import DataLoader
 
 
 class ServerNode(AbstractNode):
@@ -93,7 +98,10 @@ class ServerNode(AbstractNode):
     @classmethod
     def aggregate(cls, lock: Lock, n_round: int, save_path: Path, *args, **kwargs):
         model_path = save_path.joinpath("model")
-        model_path.mkdir(exist_ok=True,parents=True)
+        model_path.mkdir(exist_ok=True, parents=True)
+
+        val_glob_acc_cont = []
+        val_glob_loss_cont = []
 
         for c_round in range(n_round):
 
@@ -120,9 +128,18 @@ class ServerNode(AbstractNode):
             cls.global_model.load_state_dict(avg_weights)
             # release the sources
 
-            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{c_round+1}.pth")))
+            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{c_round + 1}.pth")))
+
+            # global validation
+            test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True,
+                                                    transform=CIFAR_TRANSFORMER)
+            test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=4)
+
+            val_glob_acc, val_glob_loss = eval_global_model(net=cls.global_model, test_loader=test_loader)
+            val_glob_acc_cont.append(val_glob_acc)
+            val_glob_loss_cont.append(val_glob_loss)
+
+            print(f"[Accumulator] Round[{c_round}/{n_round}] | Val Acc: {val_glob_acc}, Val Loss: {val_glob_loss}")
 
             lock.release()
             cls.release = 1
-
-
