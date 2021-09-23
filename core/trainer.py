@@ -62,8 +62,8 @@ class ClientTrainer(AbstractTrainer):
             total_correct = pred.eq(y.data.view_as(pred)).sum()
             curr_acc = total_correct / float(len(x))
 
-            total_acc.append(curr_acc)
-            total_loss.append(loss.cpu())
+            total_acc.append(curr_acc.cpu())
+            total_loss.append(loss.item())
 
             if batch_idx % 100 == 0:
                 print(
