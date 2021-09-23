@@ -4,6 +4,7 @@ from .service import ClientSyncService
 from argparse import Namespace
 
 from settings import DEFAULT_OUTPUT_DIR
+from core.utils import save_parameters
 
 
 def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSyncService:
@@ -16,10 +17,12 @@ def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSync
     serv_host = conf["server"]["ip"]
     serv_ports = [int(p["port"]) for p in conf["server"]["nodes"].values()]
 
-    _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
+    # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("server").joinpath("synchronous").joinpath(_cu)
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name)
     save_path.mkdir(exist_ok=True, parents=True)
+
+    save_parameters(vars(arguments), save_path.joinpath("parameters.txt"))
 
     service = ServerSyncService(serv_host=serv_host,
                                 serv_ports=serv_ports,
@@ -39,6 +42,14 @@ def sync_client_service_provider(arguments: Namespace, conf: dict) -> ClientSync
     """
     serv_host = conf["server"]["ip"]
     serv_port = conf["server"]["nodes"][arguments.client_node]["port"]
+
+    # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
+
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name)
+    save_path.mkdir(exist_ok=True, parents=True)
+
+    save_parameters(vars(arguments), save_path.joinpath("parameters.txt"))
+
     service = ClientSyncService(serv_host=serv_host,
                                 serv_port=serv_port,
                                 client_id=arguments.client_node,

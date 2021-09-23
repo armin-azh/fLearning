@@ -40,3 +40,15 @@ def fed_avg(w):
             w_avg[k] += w[i][k]
         w_avg[k] = torch.div(w_avg[k], len(w))
     return w_avg
+
+
+def save_parameters(args: dict, filename: Path) -> None:
+    """
+    save command parameter to txt file
+    :param args: arguments
+    :param filename: file path
+    :return: None
+    """
+    with open(str(filename), "w") as file:
+        for key, value in args.items():
+            file.write(f"{key}\t{value}\n")

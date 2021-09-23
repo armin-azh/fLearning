@@ -120,7 +120,7 @@ class ServerNode(AbstractNode):
             cls.global_model.load_state_dict(avg_weights)
             # release the sources
 
-            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"round_{c_round+1}.pth")))
+            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{c_round+1}.pth")))
 
             lock.release()
             cls.release = 1
