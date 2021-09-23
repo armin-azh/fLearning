@@ -158,5 +158,4 @@ class ServerNode(AbstractNode):
         # save values
         np.save(str(save_path.joinpath("val_glob_acc.npy")), np.array(val_glob_acc_cont))
         np.save(str(save_path.joinpath("val_glob_loss.npy")), np.array(val_glob_loss_cont))
-        
-        time.sleep(2)
+
