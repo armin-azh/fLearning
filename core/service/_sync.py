@@ -65,4 +65,5 @@ class ClientSyncService(AbstractService):
                            device=0,
                            train_loader=client_loaders[kwargs["loader_idx"]],
                            epochs=kwargs["epochs"],
+                           save_path=save_path
                            )

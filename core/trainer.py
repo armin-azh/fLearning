@@ -63,7 +63,7 @@ class ClientTrainer(AbstractTrainer):
             curr_acc = total_correct / float(len(x))
 
             total_acc.append(curr_acc)
-            total_loss.append(loss)
+            total_loss.append(loss.cpu())
 
             if batch_idx % 100 == 0:
                 print(
