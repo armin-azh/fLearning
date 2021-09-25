@@ -147,6 +147,7 @@ class ServerNode(AbstractNode):
 
             avg_weights = fed_avg(all_weights)
             cls.global_model.load_state_dict(avg_weights)
+            cls.local_models = []
             # release the sources
 
             torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{update_idx + 1}.pth")))
