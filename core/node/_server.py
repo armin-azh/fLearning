@@ -23,6 +23,7 @@ class ServerNode(AbstractNode):
     n_local_models = 0
     total_n_worker = 0
     release = 0
+    n_connected = 0
 
     def __init__(self, *args, **kwargs):
         super(ServerNode, self).__init__(*args, **kwargs)
@@ -63,6 +64,7 @@ class ServerNode(AbstractNode):
 
     def exec_(self, lock: Lock, barrier: Barrier, n_round: int, save_path: Path, **kwargs):
         self.connect()
+        ServerNode.n_connected += 1
 
         # send model to the client
         self.send(net=ServerNode.global_model)
@@ -73,7 +75,7 @@ class ServerNode(AbstractNode):
 
             s_time = time.time()
 
-            ServerNode.local_models = []
+            # ServerNode.local_models = []
 
             client_model = self.receive()  # receive model from client
 
@@ -81,6 +83,12 @@ class ServerNode(AbstractNode):
             lock.acquire()
             ServerNode.local_models.append(client_model)
             ServerNode.n_local_models += 1
+
+            # modify last round
+            if c_round + 1 == n_round:
+                ServerNode.total_n_worker -= 1
+                ServerNode.n_connected -= 1
+
             lock.release()
 
             # waiting for aggregating
@@ -114,11 +122,14 @@ class ServerNode(AbstractNode):
         val_glob_acc_cont = []
         val_glob_loss_cont = []
 
-        for c_round in range(n_round):
+        # update
+        update_idx = 0
+        while cls.total_n_worker > 0:
 
             # check all worker are arrived
             while True:
-                print(f"[Accumulator] Waiting for clients | locals: {cls.n_local_models}, total: {cls.total_n_worker}")
+                print(f"[Accumulator] Waiting for clients | locals: {cls.n_local_models}, total: {cls.total_n_worker}, "
+                      f"connected: {cls.n_connected}")
                 lock.acquire()
                 if n_limit <= cls.n_local_models:
                     cls.n_local_models = 0
@@ -138,7 +149,7 @@ class ServerNode(AbstractNode):
             cls.global_model.load_state_dict(avg_weights)
             # release the sources
 
-            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{c_round + 1}.pth")))
+            torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{update_idx + 1}.pth")))
 
             # global validation
             test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True,
@@ -149,7 +160,9 @@ class ServerNode(AbstractNode):
             val_glob_acc_cont.append(val_glob_acc)
             val_glob_loss_cont.append(val_glob_loss)
 
-            print(f"[Accumulator] Round[{c_round + 1}/{n_round}] | Val Acc: {val_glob_acc}, Val Loss: {val_glob_loss}")
+            print(f"[Accumulator] Update [{update_idx + 1}] | Val Acc: {val_glob_acc}, Val Loss: {val_glob_loss}")
+
+            update_idx += 1
 
             lock.release()
             cls.release = 1

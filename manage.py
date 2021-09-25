@@ -30,7 +30,13 @@ def main(arguments: Namespace) -> None:
     elif n_limit == 1:
         print("[Service] Asynchronous")
         # asynchronous
-        pass
+        if arguments.mode == "server":
+            service = sync_server_service_provider(arguments=arguments, conf=parsed_config)
+        elif arguments.mode == "client":
+            service = sync_client_service_provider(arguments=arguments, conf=parsed_config)
+        else:
+            print('[Failed] Wrong mode')
+
     elif 1 < n_limit < n_nodes:
         print("[Service] semi- synchronous")
         # semi- synchronous
