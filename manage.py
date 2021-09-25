@@ -32,7 +32,7 @@ def main(arguments: Namespace) -> None:
         # asynchronous
         pass
     elif 1 < n_limit < n_nodes:
-        print("[Service] Asynchronous")
+        print("[Service] semi- synchronous")
         # semi- synchronous
         pass
     else:
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--client_node", help="connect the client node", type=str, default="")
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
-    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_3")
+    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_4")
 
     # system
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=DEFAULT_N_ROUND)
