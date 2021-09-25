@@ -85,7 +85,7 @@ class ServerNode(AbstractNode):
 
             # waiting for aggregating
             while True:
-                print(f"[{self._id}] is waiting for aggregating model")
+                print(f"[{self._id}] is waiting for updated model")
 
                 lock.acquire()
                 if ServerNode.release == 1:
