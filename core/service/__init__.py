@@ -1,4 +1,4 @@
-from ._sync import ServerSyncService, ClientSyncService
+from ._service import ServerService, ClientService
 
-ServerSyncService = ServerSyncService
-ClientSyncService = ClientSyncService
+ServerService = ServerService
+ClientService = ClientService

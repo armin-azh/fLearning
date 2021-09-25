@@ -8,9 +8,9 @@ from core.models.model_factory import create_model
 from core.loader import get_cifar, get_loaders
 
 
-class ServerSyncService(AbstractService):
+class ServerService(AbstractService):
     def __init__(self, serv_host: str, serv_ports: List[int], save_path: Path, *args, **kwargs):
-        super(ServerSyncService, self).__init__(name="server-sync-service", type="sync")
+        super(ServerService, self).__init__(name="server-sync-service", type="sync")
         self._n_round = kwargs["n_round"]
         self._model_name = kwargs["model_name"]
         self._n_classes = kwargs["n_classes"]
@@ -39,9 +39,9 @@ class ServerSyncService(AbstractService):
             t.join()
 
 
-class ClientSyncService(AbstractService):
+class ClientService(AbstractService):
     def __init__(self, serv_host: str, serv_port: int, client_id: str, save_path: Path, *args, **kwargs):
-        super(ClientSyncService, self).__init__(name=f"{client_id}-sync-service", type="sync")
+        super(ClientService, self).__init__(name=f"{client_id}-sync-service", type="sync")
         self._n_round = kwargs["n_round"]
         self._n_classes = kwargs["n_classes"]
         self._n_clients = kwargs["n_clients"]

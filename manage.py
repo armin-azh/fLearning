@@ -8,8 +8,8 @@ from argparse import Namespace
 
 from settings import CONFIG, DEFAULT_N_ROUND, DEFAULT_N_LIMIT
 from core.utils import read_yaml_file
-from core.provider import (sync_server_service_provider,
-                           sync_client_service_provider)
+from core.provider import (server_service_provider,
+                           client_service_provider)
 
 
 def main(arguments: Namespace) -> None:
@@ -22,25 +22,30 @@ def main(arguments: Namespace) -> None:
         print("[Service] Synchronous")
         # synchronous
         if arguments.mode == "server":
-            service = sync_server_service_provider(arguments=arguments, conf=parsed_config)
+            server_service_provider(arguments=arguments, conf=parsed_config)
         elif arguments.mode == "client":
-            service = sync_client_service_provider(arguments=arguments, conf=parsed_config)
+            client_service_provider(arguments=arguments, conf=parsed_config)
         else:
             print('[Failed] Wrong mode')
     elif n_limit == 1:
         print("[Service] Asynchronous")
         # asynchronous
         if arguments.mode == "server":
-            service = sync_server_service_provider(arguments=arguments, conf=parsed_config)
+            server_service_provider(arguments=arguments, conf=parsed_config)
         elif arguments.mode == "client":
-            service = sync_client_service_provider(arguments=arguments, conf=parsed_config)
+            client_service_provider(arguments=arguments, conf=parsed_config)
         else:
             print('[Failed] Wrong mode')
 
     elif 1 < n_limit < n_nodes:
         print("[Service] semi- synchronous")
         # semi- synchronous
-        pass
+        if arguments.mode == "server":
+            server_service_provider(arguments=arguments, conf=parsed_config)
+        elif arguments.mode == "client":
+            client_service_provider(arguments=arguments, conf=parsed_config)
+        else:
+            print('[Failed] Wrong mode')
     else:
         print(f"[Failed] invalid number of nodes:{n_nodes} or number of limit:{n_limit}")
 

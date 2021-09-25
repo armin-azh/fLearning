@@ -1,13 +1,12 @@
-from datetime import datetime
-from .service import ServerSyncService
-from .service import ClientSyncService
+from .service import ServerService
+from .service import ClientService
 from argparse import Namespace
 
 from settings import DEFAULT_OUTPUT_DIR
 from core.utils import save_parameters
 
 
-def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSyncService:
+def server_service_provider(arguments: Namespace, conf: dict) -> ServerService:
     """
     create SyncService
     :param arguments:
@@ -19,22 +18,23 @@ def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSync
 
     # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name).joinpath("server")
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name).joinpath(
+        "server")
     save_path.mkdir(exist_ok=True, parents=True)
 
     save_parameters(vars(arguments), save_path.joinpath("glob_parameters.txt"))
 
-    service = ServerSyncService(serv_host=serv_host,
-                                serv_ports=serv_ports,
-                                n_round=arguments.n_round,
-                                model_name=arguments.model_name,
-                                n_classes=arguments.n_classes,
-                                save_path=save_path,
-                                n_limit=conf["server"]["limit"])
+    service = ServerService(serv_host=serv_host,
+                            serv_ports=serv_ports,
+                            n_round=arguments.n_round,
+                            model_name=arguments.model_name,
+                            n_classes=arguments.n_classes,
+                            save_path=save_path,
+                            n_limit=conf["server"]["limit"])
     return service
 
 
-def sync_client_service_provider(arguments: Namespace, conf: dict) -> ClientSyncService:
+def client_service_provider(arguments: Namespace, conf: dict) -> ClientService:
     """
     creat client sync service
     :param arguments:
@@ -46,23 +46,24 @@ def sync_client_service_provider(arguments: Namespace, conf: dict) -> ClientSync
 
     # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name).joinpath("nodes")
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name).joinpath(
+        "nodes")
     save_path.mkdir(exist_ok=True, parents=True)
 
-    service = ClientSyncService(serv_host=serv_host,
-                                serv_port=serv_port,
-                                client_id=arguments.client_node,
-                                n_round=arguments.n_round,
-                                lr=arguments.lr,
-                                momentum=arguments.momentum,
-                                weight_decay=arguments.weight_decay,
-                                n_classes=arguments.n_classes,
-                                n_clients=len(list(conf["server"]["nodes"].keys())),
-                                alpha=arguments.alpha,
-                                n_worker=arguments.n_worker,
-                                random_seed=arguments.seed,
-                                batch_size=arguments.batch_size,
-                                loader_idx=arguments.client_loader,
-                                epochs=arguments.epochs,
-                                save_path=save_path)
+    service = ClientService(serv_host=serv_host,
+                            serv_port=serv_port,
+                            client_id=arguments.client_node,
+                            n_round=arguments.n_round,
+                            lr=arguments.lr,
+                            momentum=arguments.momentum,
+                            weight_decay=arguments.weight_decay,
+                            n_classes=arguments.n_classes,
+                            n_clients=len(list(conf["server"]["nodes"].keys())),
+                            alpha=arguments.alpha,
+                            n_worker=arguments.n_worker,
+                            random_seed=arguments.seed,
+                            batch_size=arguments.batch_size,
+                            loader_idx=arguments.client_loader,
+                            epochs=arguments.epochs,
+                            save_path=save_path)
     return service
