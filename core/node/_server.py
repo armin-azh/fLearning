@@ -107,7 +107,7 @@ class ServerNode(AbstractNode):
         self._socket.close()
 
     @classmethod
-    def aggregate(cls, lock: Lock, n_round: int, save_path: Path, *args, **kwargs):
+    def aggregate(cls, lock: Lock, n_round: int, save_path: Path, n_limit: int, *args, **kwargs):
         model_path = save_path.joinpath("model")
         model_path.mkdir(exist_ok=True, parents=True)
 
@@ -118,10 +118,9 @@ class ServerNode(AbstractNode):
 
             # check all worker are arrived
             while True:
-                print(f"[Accumulator] Waiting for clients")
-                print(f"locals: {cls.n_local_models}, total: {cls.total_n_worker}")
+                print(f"[Accumulator] Waiting for clients | locals: {cls.n_local_models}, total: {cls.total_n_worker}")
                 lock.acquire()
-                if cls.total_n_worker == cls.n_local_models:
+                if n_limit <= cls.n_local_models:
                     cls.n_local_models = 0
                     break
                 lock.release()
@@ -144,7 +143,7 @@ class ServerNode(AbstractNode):
             # global validation
             test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True,
                                                     transform=CIFAR_TRANSFORMER)
-            test_loader = DataLoader(test_set, batch_size=100, shuffle=False, num_workers=4)
+            test_loader = DataLoader(test_set, batch_size=16, shuffle=False, num_workers=2)
 
             val_glob_acc, val_glob_loss = eval_global_model(net=cls.global_model, test_loader=test_loader)
             val_glob_acc_cont.append(val_glob_acc)
@@ -158,4 +157,3 @@ class ServerNode(AbstractNode):
         # save values
         np.save(str(save_path.joinpath("val_glob_acc.npy")), np.array(val_glob_acc_cont))
         np.save(str(save_path.joinpath("val_glob_loss.npy")), np.array(val_glob_loss_cont))
-

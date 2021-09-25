@@ -6,7 +6,7 @@ import os
 import argparse
 from argparse import Namespace
 
-from settings import STRATEGIES, DEFAULT_OUTPUT_DIR, CONFIG
+from settings import CONFIG, DEFAULT_N_ROUND, DEFAULT_N_LIMIT
 from core.utils import read_yaml_file
 from core.provider import (sync_server_service_provider,
                            sync_client_service_provider)
@@ -15,20 +15,28 @@ from core.provider import (sync_server_service_provider,
 def main(arguments: Namespace) -> None:
     parsed_config = read_yaml_file(CONFIG)
     strategy = parsed_config["server"]["type"]
+    n_nodes = len(list(parsed_config["server"]["nodes"].keys()))
+    n_limit = parsed_config["server"]["limit"]
 
-    if strategy == "synchronous":
+    if n_nodes == n_limit:
+        print("[Service] Synchronous")
+        # synchronous
         if arguments.mode == "server":
             service = sync_server_service_provider(arguments=arguments, conf=parsed_config)
         elif arguments.mode == "client":
             service = sync_client_service_provider(arguments=arguments, conf=parsed_config)
         else:
             print('[Failed] Wrong mode')
-    elif strategy == "asynchronous":
+    elif n_limit == 1:
+        print("[Service] Asynchronous")
+        # asynchronous
         pass
-    elif strategy == "semi-synchronous":
+    elif 1 < n_limit < n_nodes:
+        print("[Service] Asynchronous")
+        # semi- synchronous
         pass
     else:
-        print("[Failed] Wrong ser")
+        print(f"[Failed] invalid number of nodes:{n_nodes} or number of limit:{n_limit}")
 
 
 if __name__ == '__main__':
@@ -38,10 +46,11 @@ if __name__ == '__main__':
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--client_node", help="connect the client node", type=str, default="")
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
-    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="debug")
+    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_3")
 
     # system
-    parser.add_argument("--n_round", help="Number of rounds", type=int, default=1)
+    parser.add_argument("--n_round", help="Number of rounds", type=int, default=DEFAULT_N_ROUND)
+    parser.add_argument("--n_limit", help="Number of round for semi-synchronous", type=int, default=DEFAULT_N_LIMIT)
 
     # local model
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])
@@ -49,12 +58,12 @@ if __name__ == '__main__':
     parser.add_argument("--model_name", help="Model class name", type=str, default="resnet8_sm")
     parser.add_argument("--epochs", help="total number of client epochs", type=int, default=10)
     parser.add_argument('--frac', default=0.4, type=float, help="the fraction of clients: C")
-    parser.add_argument("--batch_size", help="local model batch size", type=int, default=32)
+    parser.add_argument("--batch_size", help="local model batch size", type=int, default=16)
     parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)
     parser.add_argument("--momentum", default=0.9, type=float, help="SGD momentum")
     parser.add_argument("--weight_decay", default=5e-4, type=float, help="SGD weight decay (default: 5e-4)")
 
-    parser.add_argument("--n_worker", help="number of worker for load dataset", type=int, default=3)
+    parser.add_argument("--n_worker", help="number of worker for load dataset", type=int, default=1)
 
     args = parser.parse_args()
 

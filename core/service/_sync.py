@@ -14,6 +14,7 @@ class ServerSyncService(AbstractService):
         self._n_round = kwargs["n_round"]
         self._model_name = kwargs["model_name"]
         self._n_classes = kwargs["n_classes"]
+        self._n_limit = kwargs["n_limit"]
 
         self._serv_host = serv_host
         self._serv_ports = serv_ports
@@ -22,8 +23,8 @@ class ServerSyncService(AbstractService):
         self._barrier = threading.Barrier(self._total_n_clients)
         self._serv_lock = threading.Lock()
         Server.total_n_worker = self._total_n_clients
-        Server.global_model = create_model(name=self._model_name, num_classes=self._n_classes, device=0)
-        t = threading.Thread(target=Server.aggregate, args=(self._serv_lock, self._n_round, save_path))
+        Server.global_model = create_model(name=self._model_name, num_classes=self._n_classes, device="cpu")
+        t = threading.Thread(target=Server.aggregate, args=(self._serv_lock, self._n_round, save_path,self._n_limit))
         t.start()
 
         self._servers = [Server(ip=self._serv_host, port=p, name=f"server_{idx}") for idx, p in

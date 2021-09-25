@@ -22,3 +22,6 @@ CONFIG = Path("configuration/service_1.yml")
 
 if not CONFIG.is_absolute():
     CONFIG = BASE_DIR.joinpath(CONFIG)
+
+DEFAULT_N_ROUND = 10
+DEFAULT_N_LIMIT = 1

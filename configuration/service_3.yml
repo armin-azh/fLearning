@@ -1,0 +1,13 @@
+
+server:
+  type: asynchronous
+  limit: 1
+  name: asynchronous-service
+  ip: 127.0.0.1
+  nodes:
+    client1:
+      port: 65431
+    client2:
+      port: 65432
+    client3:
+      port: 65433

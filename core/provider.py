@@ -29,7 +29,8 @@ def sync_server_service_provider(arguments: Namespace, conf: dict) -> ServerSync
                                 n_round=arguments.n_round,
                                 model_name=arguments.model_name,
                                 n_classes=arguments.n_classes,
-                                save_path=save_path)
+                                save_path=save_path,
+                                n_limit=conf["server"]["limit"])
     return service
 
 

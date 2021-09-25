@@ -52,8 +52,10 @@ class ClientTrainer(AbstractTrainer):
         total_loss = []
 
         for batch_idx, (x, y) in enumerate(train_loader):
-            x = x.to(device, non_blocking=True)
-            y = y.to(device, non_blocking=True)
+            # x = x.to(device, non_blocking=True)
+            # y = y.to(device, non_blocking=True)
+            x = x.cpu()
+            y = y.cpu()
 
             self._opt.zero_grad()
             y_hat, loss = self._calculate_loss(x, y)
@@ -94,7 +96,7 @@ class ClientTrainer(AbstractTrainer):
 
 def eval_global_model(net, test_loader):
     net.eval()
-    device = torch.device('cuda')
+    device = torch.device('cpu')
     criterion = nn.CrossEntropyLoss()
 
     with torch.no_grad():
