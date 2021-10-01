@@ -6,9 +6,10 @@ from settings import DEFAULT_OUTPUT_DIR
 from core.utils import save_parameters
 
 
-def server_service_provider(arguments: Namespace, conf: dict) -> ServerService:
+def server_service_provider(arguments: Namespace, conf: dict, prefix: str) -> ServerService:
     """
     create SyncService
+    :param prefix:
     :param arguments:
     :param conf:
     :return:
@@ -18,7 +19,7 @@ def server_service_provider(arguments: Namespace, conf: dict) -> ServerService:
 
     # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name).joinpath(
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath(prefix).joinpath(arguments.run_name).joinpath(
         "server")
     save_path.mkdir(exist_ok=True, parents=True)
 
@@ -34,7 +35,7 @@ def server_service_provider(arguments: Namespace, conf: dict) -> ServerService:
     return service
 
 
-def client_service_provider(arguments: Namespace, conf: dict) -> ClientService:
+def client_service_provider(arguments: Namespace, conf: dict, prefix:str) -> ClientService:
     """
     creat client sync service
     :param arguments:
@@ -46,7 +47,7 @@ def client_service_provider(arguments: Namespace, conf: dict) -> ClientService:
 
     # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath("synchronous").joinpath(arguments.run_name).joinpath(
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath(prefix).joinpath(arguments.run_name).joinpath(
         "nodes")
     save_path.mkdir(exist_ok=True, parents=True)
 

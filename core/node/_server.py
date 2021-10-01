@@ -24,6 +24,8 @@ class ServerNode(AbstractNode):
     total_n_worker = 0
     release = 0
     n_connected = 0
+    round_idx = 0
+    cnt = 0
 
     def __init__(self, *args, **kwargs):
         super(ServerNode, self).__init__(*args, **kwargs)
@@ -83,6 +85,7 @@ class ServerNode(AbstractNode):
             lock.acquire()
             ServerNode.local_models.append(client_model)
             ServerNode.n_local_models += 1
+            ServerNode.cnt += 1
 
             # modify last round
             if c_round + 1 == n_round:
@@ -92,7 +95,7 @@ class ServerNode(AbstractNode):
             lock.release()
 
             # waiting for aggregating
-            while True:
+            while ServerNode.total_n_worker > 0:
                 print(f"[{self._id}] is waiting for updated model")
 
                 lock.acquire()
@@ -100,6 +103,7 @@ class ServerNode(AbstractNode):
                     lock.release()
                     break
                 lock.release()
+
                 time.sleep(1)
 
             e_time = time.time() - s_time
@@ -113,6 +117,7 @@ class ServerNode(AbstractNode):
 
         # close socket
         self._socket.close()
+        print(f"[{self._id}] connection closed")
 
     @classmethod
     def aggregate(cls, lock: Lock, n_round: int, save_path: Path, n_limit: int, *args, **kwargs):
@@ -126,12 +131,18 @@ class ServerNode(AbstractNode):
         update_idx = 0
         while cls.total_n_worker > 0:
 
+            if cls.n_connected == 0 and cls.total_n_worker == 0:
+                break
+
             # check all worker are arrived
-            while True:
+            while cls.total_n_worker > 0 and cls.round_idx < n_round:
+                if cls.n_connected == 0 and cls.total_n_worker == 0:
+                    break
+
                 print(f"[Accumulator] Waiting for clients | locals: {cls.n_local_models}, total: {cls.total_n_worker}, "
                       f"connected: {cls.n_connected}")
                 lock.acquire()
-                if n_limit <= cls.n_local_models:
+                if n_limit <= cls.n_local_models or cls.n_local_models >= cls.total_n_worker:
                     cls.n_local_models = 0
                     break
                 lock.release()
@@ -145,10 +156,11 @@ class ServerNode(AbstractNode):
                 all_weights.append(copy.deepcopy(w))
             print("[Accumulator] Collected weights")
 
-            avg_weights = fed_avg(all_weights)
-            cls.global_model.load_state_dict(avg_weights)
-            cls.local_models = []
-            # release the sources
+            if len(all_weights) > 0:
+                avg_weights = fed_avg(all_weights)
+                cls.global_model.load_state_dict(avg_weights)
+                cls.local_models = []
+                # release the sources
 
             torch.save(cls.global_model.state_dict(), str(model_path.joinpath(f"global_model_r_{update_idx + 1}.pth")))
 
@@ -168,6 +180,6 @@ class ServerNode(AbstractNode):
             lock.release()
             cls.release = 1
 
-        # save values
-        np.save(str(save_path.joinpath("val_glob_acc.npy")), np.array(val_glob_acc_cont))
-        np.save(str(save_path.joinpath("val_glob_loss.npy")), np.array(val_glob_loss_cont))
+            # save values
+            np.save(str(save_path.joinpath("val_glob_acc.npy")), np.array(val_glob_acc_cont))
+            np.save(str(save_path.joinpath("val_glob_loss.npy")), np.array(val_glob_loss_cont))

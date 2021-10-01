@@ -1,6 +1,7 @@
 import socket
 import pickle
 import numpy as np
+import time
 from pathlib import Path
 
 from torch.optim import SGD
@@ -62,3 +63,6 @@ class ClientNode(AbstractNode):
 
         np.save(str(save_path.joinpath(f"{self._id}_acc.npy")), rounds_acc)
         np.save(str(save_path.joinpath(f"{self._id}_loss.npy")), rounds_loss)
+
+        time.sleep(30)
+        self._socket.close()

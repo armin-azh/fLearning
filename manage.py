@@ -22,18 +22,18 @@ def main(arguments: Namespace) -> None:
         print("[Service] Synchronous")
         # synchronous
         if arguments.mode == "server":
-            server_service_provider(arguments=arguments, conf=parsed_config)
+            server_service_provider(arguments=arguments, conf=parsed_config, prefix="Synchronous")
         elif arguments.mode == "client":
-            client_service_provider(arguments=arguments, conf=parsed_config)
+            client_service_provider(arguments=arguments, conf=parsed_config, prefix="Synchronous")
         else:
             print('[Failed] Wrong mode')
     elif n_limit == 1:
         print("[Service] Asynchronous")
         # asynchronous
         if arguments.mode == "server":
-            server_service_provider(arguments=arguments, conf=parsed_config)
+            server_service_provider(arguments=arguments, conf=parsed_config, prefix="Asynchronous")
         elif arguments.mode == "client":
-            client_service_provider(arguments=arguments, conf=parsed_config)
+            client_service_provider(arguments=arguments, conf=parsed_config, prefix="Asynchronous")
         else:
             print('[Failed] Wrong mode')
 
@@ -41,9 +41,9 @@ def main(arguments: Namespace) -> None:
         print("[Service] semi- synchronous")
         # semi- synchronous
         if arguments.mode == "server":
-            server_service_provider(arguments=arguments, conf=parsed_config)
+            server_service_provider(arguments=arguments, conf=parsed_config, prefix="semi- synchronous")
         elif arguments.mode == "client":
-            client_service_provider(arguments=arguments, conf=parsed_config)
+            client_service_provider(arguments=arguments, conf=parsed_config, prefix="semi- synchronous")
         else:
             print('[Failed] Wrong mode')
     else:
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--client_node", help="connect the client node", type=str, default="")
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
-    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_5")
+    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_3_client")
 
     # system
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=DEFAULT_N_ROUND)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     # local model
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])
     parser.add_argument('--alpha', default=0.1, type=float, help="alpha for dirichlet distribution")
-    parser.add_argument("--model_name", help="Model class name", type=str, default="resnet8_sm")
+    parser.add_argument("--model_name", help="Model class name", type=str, default="cnn")
     parser.add_argument("--epochs", help="total number of client epochs", type=int, default=10)
     parser.add_argument('--frac', default=0.4, type=float, help="the fraction of clients: C")
     parser.add_argument("--batch_size", help="local model batch size", type=int, default=16)

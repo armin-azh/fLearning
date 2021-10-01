@@ -1,7 +1,7 @@
 
 server:
   type: synchronous
-  limit: 2
+  limit: 3
   name: synchronous-service
   ip: 127.0.0.1
   nodes:
@@ -9,3 +9,5 @@ server:
       port: 65431
     client2:
       port: 65432
+    client3:
+      port: 65433

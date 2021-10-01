@@ -24,7 +24,7 @@ class ServerService(AbstractService):
         self._serv_lock = threading.Lock()
         Server.total_n_worker = self._total_n_clients
         Server.global_model = create_model(name=self._model_name, num_classes=self._n_classes, device="cpu")
-        t = threading.Thread(target=Server.aggregate, args=(self._serv_lock, self._n_round, save_path,self._n_limit))
+        t = threading.Thread(target=Server.aggregate, args=(self._serv_lock, self._n_round, save_path, self._n_limit))
         t.start()
 
         self._servers = [Server(ip=self._serv_host, port=p, name=f"server_{idx}") for idx, p in
