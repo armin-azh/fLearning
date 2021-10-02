@@ -178,7 +178,12 @@ class ServerNode(AbstractNode):
             update_idx += 1
 
             lock.release()
-            cls.release = 1
+
+            if n_limit <= cls.cnt:
+                cls.cnt = 0
+                cls.release = 1
+            else:
+                cls.release = 0
 
             # save values
             np.save(str(save_path.joinpath("val_glob_acc.npy")), np.array(val_glob_acc_cont))

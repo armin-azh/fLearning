@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--client_node", help="connect the client node", type=str, default="")
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
-    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_3_client")
+    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_3_client_semi")
 
     # system
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=DEFAULT_N_ROUND)
