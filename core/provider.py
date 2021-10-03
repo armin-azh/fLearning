@@ -19,7 +19,7 @@ def server_service_provider(arguments: Namespace, conf: dict, prefix: str) -> Se
 
     # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath(prefix).joinpath(arguments.run_name).joinpath(
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("centralized").joinpath(prefix).joinpath(arguments.run_name).joinpath(
         "server")
     save_path.mkdir(exist_ok=True, parents=True)
 
@@ -47,7 +47,7 @@ def client_service_provider(arguments: Namespace, conf: dict, prefix:str) -> Cli
 
     # _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
 
-    save_path = DEFAULT_OUTPUT_DIR.joinpath("session").joinpath(prefix).joinpath(arguments.run_name).joinpath(
+    save_path = DEFAULT_OUTPUT_DIR.joinpath("centralized").joinpath(prefix).joinpath(arguments.run_name).joinpath(
         "nodes")
     save_path.mkdir(exist_ok=True, parents=True)
 
