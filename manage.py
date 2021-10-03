@@ -6,7 +6,7 @@ import os
 import argparse
 from argparse import Namespace
 
-from settings import CONFIG, DEFAULT_N_ROUND, DEFAULT_N_LIMIT
+from settings import CONFIG, DEFAULT_N_ROUND, DEFAULT_N_LIMIT, RUN_TYPE
 from core.utils import read_yaml_file
 from core.provider import (server_service_provider,
                            client_service_provider)
@@ -14,50 +14,62 @@ from core.provider import (server_service_provider,
 
 def main(arguments: Namespace) -> None:
     parsed_config = read_yaml_file(CONFIG)
-    strategy = parsed_config["server"]["type"]
-    n_nodes = len(list(parsed_config["server"]["nodes"].keys()))
-    n_limit = parsed_config["server"]["limit"]
 
-    if n_nodes == n_limit:
-        print("[Service] Synchronous")
-        # synchronous
-        if arguments.mode == "server":
-            server_service_provider(arguments=arguments, conf=parsed_config, prefix="Synchronous")
-        elif arguments.mode == "client":
-            client_service_provider(arguments=arguments, conf=parsed_config, prefix="Synchronous")
-        else:
-            print('[Failed] Wrong mode')
-    elif n_limit == 1:
-        print("[Service] Asynchronous")
-        # asynchronous
-        if arguments.mode == "server":
-            server_service_provider(arguments=arguments, conf=parsed_config, prefix="Asynchronous")
-        elif arguments.mode == "client":
-            client_service_provider(arguments=arguments, conf=parsed_config, prefix="Asynchronous")
-        else:
-            print('[Failed] Wrong mode')
+    if arguments.run_type == "centralized":
+        strategy = parsed_config["server"]["type"]
+        n_nodes = len(list(parsed_config["server"]["nodes"].keys()))
+        n_limit = parsed_config["server"]["limit"]
 
-    elif 1 < n_limit < n_nodes:
-        print("[Service] semi- synchronous")
-        # semi- synchronous
-        if arguments.mode == "server":
-            server_service_provider(arguments=arguments, conf=parsed_config, prefix="semi- synchronous")
-        elif arguments.mode == "client":
-            client_service_provider(arguments=arguments, conf=parsed_config, prefix="semi- synchronous")
+        if n_nodes == n_limit:
+            print("[Service] Synchronous")
+            # synchronous
+            if arguments.mode == "server":
+                server_service_provider(arguments=arguments, conf=parsed_config, prefix="Synchronous")
+            elif arguments.mode == "client":
+                client_service_provider(arguments=arguments, conf=parsed_config, prefix="Synchronous")
+            else:
+                print('[Failed] Wrong mode')
+        elif n_limit == 1:
+            print("[Service] Asynchronous")
+            # asynchronous
+            if arguments.mode == "server":
+                server_service_provider(arguments=arguments, conf=parsed_config, prefix="Asynchronous")
+            elif arguments.mode == "client":
+                client_service_provider(arguments=arguments, conf=parsed_config, prefix="Asynchronous")
+            else:
+                print('[Failed] Wrong mode')
+
+        elif 1 < n_limit < n_nodes:
+            print("[Service] semi- synchronous")
+            # semi- synchronous
+            if arguments.mode == "server":
+                server_service_provider(arguments=arguments, conf=parsed_config, prefix="semi- synchronous")
+            elif arguments.mode == "client":
+                client_service_provider(arguments=arguments, conf=parsed_config, prefix="semi- synchronous")
+            else:
+                print('[Failed] Wrong mode')
         else:
-            print('[Failed] Wrong mode')
+            print(f"[Failed] invalid number of nodes:{n_nodes} or number of limit:{n_limit}")
+
+    elif arguments.run_type == "decentralized":
+        pass
+
+    elif arguments.run_type == "centralized":
+        pass
     else:
-        print(f"[Failed] invalid number of nodes:{n_nodes} or number of limit:{n_limit}")
+        print(f"[Failed] you had entered wrong option {arguments.run_type}")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", help="server or client node", type=str, default="server",
                         choices=["server", "client"])
+    parser.add_argument("--run_type", help="running type mode", type=str, default="centralized", choices=RUN_TYPE)
     parser.add_argument("--seed", help="Determine Seed", type=int, default=99)
     parser.add_argument("--client_node", help="connect the client node", type=str, default="")
     parser.add_argument("--client_loader", help="client loader", type=int, default=0)
-    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str, default="test_3_client_semi")
+    parser.add_argument("--run_name", help="name of the current run for split the folder", type=str,
+                        default="test_3_client_semi")
 
     # system
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=DEFAULT_N_ROUND)

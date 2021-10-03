@@ -18,10 +18,12 @@ if not DEFAULT_OUTPUT_DIR.is_absolute():
     DEFAULT_OUTPUT_DIR = BASE_DIR.joinpath(DEFAULT_OUTPUT_DIR)
 DEFAULT_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-CONFIG = Path("configuration/service_4.yml")
+CONFIG = Path("configuration/centralized/service_4.yml")
 
 if not CONFIG.is_absolute():
     CONFIG = BASE_DIR.joinpath(CONFIG)
 
 DEFAULT_N_ROUND = 10
 DEFAULT_N_LIMIT = 1
+
+RUN_TYPE = ["centralized", "decentralized", "clustering"]
