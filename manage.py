@@ -11,6 +11,9 @@ from core.utils import read_yaml_file
 from core.provider import (server_service_provider,
                            client_service_provider)
 
+# decentralized
+from core.decentralized.utils import parse_node
+
 
 def main(arguments: Namespace) -> None:
     parsed_config = read_yaml_file(CONFIG)
@@ -52,7 +55,8 @@ def main(arguments: Namespace) -> None:
             print(f"[Failed] invalid number of nodes:{n_nodes} or number of limit:{n_limit}")
 
     elif arguments.run_type == "decentralized":
-        pass
+        nodes = parse_node(parsed_yml=parsed_config)
+        print(nodes)
 
     elif arguments.run_type == "centralized":
         pass
