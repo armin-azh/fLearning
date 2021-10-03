@@ -13,6 +13,7 @@ from core.provider import (server_service_provider,
 
 # decentralized
 from core.decentralized.utils import parse_node
+from core.decentralized.service import ComputationGraphService
 
 
 def main(arguments: Namespace) -> None:
@@ -56,7 +57,7 @@ def main(arguments: Namespace) -> None:
 
     elif arguments.run_type == "decentralized":
         nodes = parse_node(parsed_yml=parsed_config)
-        print(nodes)
+        cp = ComputationGraphService(parsed_yml=nodes)
 
     elif arguments.run_type == "centralized":
         pass
