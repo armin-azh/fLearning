@@ -1,15 +1,20 @@
 from typing import Union, List, Tuple
 import socket
-from threading import Lock
+from threading import Lock, Barrier
 import threading
 import time
 import random
 
+import numpy as np
+
+import torch
+from torch.utils.data import DataLoader
+
 
 class SingleNode:
     SocketCheckList = {}
-    SocketRelease = None    # nd array
-    SocketConnections = None    # nd array
+    SocketRelease = None  # nd array
+    SocketConnections = None  # nd array
     HostNameMap = {}
     HostCnt = 0
 
@@ -89,3 +94,53 @@ class SingleNode:
 
     def receive(self, **kwargs):
         pass
+
+    def exec_(self, n_round: int, epochs: int, train_loader: DataLoader, sync_barrier: Barrier, opt, criterion,
+              opt_conf):
+        total_acc = []
+        total_loss = []
+
+        opt = opt(self._model.parameters(), **opt_conf)
+
+        step = 0
+        for r in range(n_round):
+            sync_barrier.wait()
+            print(f"[Node({self._host_idx})] starting round [{r + 1}/{n_round}]")
+            ep_acc = []
+            ep_loss = []
+            for epoch in range(epochs):
+                b_acc = []
+                b_loss = []
+                for batch_idx, (x, y) in enumerate(train_loader):
+                    x = x.cpu()
+                    y = y.cpu()
+
+                    # start updating
+                    opt.zero_grad()
+                    y_hat = self._model(x)
+                    loss = criterion(y_hat, y)
+                    loss.backward()
+                    opt.step()
+                    # end updating
+
+                    pred = y_hat.data.max(1, keepdim=True)[1]
+                    total_correct = pred.eq(y.data.view_as(pred)).sum()
+                    curr_acc = total_correct / float(len(x))
+
+                    b_acc.append(curr_acc.cpu())
+                    b_loss.append(loss.item())
+
+                    if step % 100 == 0 and step > 0:
+                        print(
+                            f"[Node({self._host_idx})] [{r + 1}/{n_round}] round | [{epoch + 1}/{epochs}] "
+                            f"epoch | Loss: {b_loss[-1]}, Acc: {b_acc[-1]}")
+                    step += 1
+
+                ep_acc.append(np.array(b_acc).mean())
+                ep_loss.append(np.array(b_loss).mean())
+
+            total_acc.append(np.array(ep_acc).mean())
+            total_loss.append(np.array(ep_loss).mean())
+
+            print(f"[Node({self._host_idx})] ending round [{r + 1}/{n_round}] and waiting for other nodes")
+            sync_barrier.wait()

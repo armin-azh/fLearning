@@ -6,7 +6,6 @@ import numpy as np
 
 def get_cifar(num_classes=100, dataset_dir="./data"):
     if num_classes == 10:
-        print("Loading CIFAR10...")
         dataset = torchvision.datasets.CIFAR10
         normalize = transforms.Normalize(
             (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))

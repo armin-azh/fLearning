@@ -1,8 +1,16 @@
+import warnings
+
+warnings.filterwarnings("ignore")
+
 import threading
-from ._node import SingleNode
-from core.models.model_factory import create_model
 import numpy as np
 import time
+import torch
+from torch import nn
+
+from ._node import SingleNode
+from core.models.model_factory import create_model
+from core.loader import get_cifar, get_loaders
 
 
 class ComputationGraphService:
@@ -12,9 +20,9 @@ class ComputationGraphService:
         self._n_classes = n_classes
         self._nodes = []
 
-        n_nodes = len(list(self._nodes_conf.values()))  # number of nodes
-        SingleNode.SocketRelease = np.zeros((n_nodes,))  # initiate the release tab
-        SingleNode.SocketConnections = np.zeros((n_nodes,))  # initiate the connection
+        self._n_nodes = len(list(self._nodes_conf.values()))  # number of nodes
+        SingleNode.SocketRelease = np.zeros((self._n_nodes,))  # initiate the release tab
+        SingleNode.SocketConnections = np.zeros((self._n_nodes,))  # initiate the connection
         glob_node_lock = threading.Lock()
 
         # start initiate node and build the computation graph
@@ -44,8 +52,41 @@ class ComputationGraphService:
             time.sleep(3)  # bigger number for bigger computation graph
         # end, make sure that all computation graph is built
 
+    def train(self, arguments):
         # start training process
-        print(f"[Train] now start training process")
+        print(f"[Train] now start training process on {self._n_classes} nodes")
 
-        print(SingleNode.SocketConnections)
+        barrier = threading.Barrier(parties=self._n_nodes)
+
+        opt_conf = {
+            "lr": arguments.lr,
+            "momentum": arguments.momentum,
+            "weight_decay": arguments.weight_decay
+        }
+
+        train_dataset, test_dataset = get_cifar(self._n_classes)
+        client_loaders, _ = get_loaders(train_dataset,
+                                        test_dataset,
+                                        n_clients=self._n_nodes,
+                                        alpha=arguments.alpha,
+                                        batch_size=arguments.batch_size,
+                                        n_data=None,
+                                        num_workers=arguments.n_worker,
+                                        seed=arguments.seed, )
+
+        for idx, node in enumerate(self._nodes):
+            opt = torch.optim.SGD
+            loss = nn.CrossEntropyLoss()
+
+            train_loader = client_loaders[idx]
+            t = threading.Thread(target=node.exec_, args=(arguments.n_round,
+                                                          arguments.epochs,
+                                                          train_loader,
+                                                          barrier,
+                                                          opt,
+                                                          loss,
+                                                          opt_conf))
+
+            t.start()
+
         # end training process
