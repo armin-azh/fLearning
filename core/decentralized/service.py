@@ -5,12 +5,16 @@ warnings.filterwarnings("ignore")
 import threading
 import numpy as np
 import time
+from datetime import datetime
 import torch
 from torch import nn
 
 from ._node import SingleNode
 from core.models.model_factory import create_model
 from core.loader import get_cifar, get_loaders
+
+from settings import DEFAULT_OUTPUT_DIR
+from core.utils import save_parameters
 
 
 class ComputationGraphService:
@@ -21,9 +25,14 @@ class ComputationGraphService:
         self._nodes = []
 
         self._n_nodes = len(list(self._nodes_conf.values()))  # number of nodes
-        SingleNode.SendIdx = [0]*self._n_nodes
+        SingleNode.SendIdx = [0] * self._n_nodes
         SingleNode.SocketConnections = np.zeros((self._n_nodes,))  # initiate the connection
         glob_node_lock = threading.Lock()
+
+        _cu = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S')
+
+        save_path = DEFAULT_OUTPUT_DIR.joinpath("decentralized").joinpath("Synchronous").joinpath(_cu)
+        save_path.mkdir(exist_ok=True, parents=True)
 
         # start initiate node and build the computation graph
         for key, value in self._nodes_conf.items():
@@ -38,7 +47,8 @@ class ComputationGraphService:
                            name=key,
                            model=n_model,
                            glob_lock=glob_node_lock,
-                           host_idx=SingleNode.HostCnt))
+                           host_idx=SingleNode.HostCnt,
+                           save_path=save_path))
             SingleNode.HostCnt += 1
         # end initiate node and build the computation graph
 
@@ -57,7 +67,7 @@ class ComputationGraphService:
         print(f"[Train] now start training process on {self._n_classes} nodes")
 
         barrier = threading.Barrier(parties=self._n_nodes)
-        agg_barrier = threading.Barrier(parties=self._n_nodes*2)
+        agg_barrier = threading.Barrier(parties=self._n_nodes * 2)
 
         opt_conf = {
             "lr": arguments.lr,
@@ -66,14 +76,14 @@ class ComputationGraphService:
         }
 
         train_dataset, test_dataset = get_cifar(self._n_classes)
-        client_loaders, _ = get_loaders(train_dataset,
-                                        test_dataset,
-                                        n_clients=self._n_nodes,
-                                        alpha=arguments.alpha,
-                                        batch_size=arguments.batch_size,
-                                        n_data=None,
-                                        num_workers=arguments.n_worker,
-                                        seed=arguments.seed, )
+        client_loaders, test_loader = get_loaders(train_dataset,
+                                                  test_dataset,
+                                                  n_clients=self._n_nodes,
+                                                  alpha=arguments.alpha,
+                                                  batch_size=arguments.batch_size,
+                                                  n_data=None,
+                                                  num_workers=arguments.n_worker,
+                                                  seed=arguments.seed, )
 
         for idx, node in enumerate(self._nodes):
             opt = torch.optim.SGD
@@ -83,6 +93,7 @@ class ComputationGraphService:
             t = threading.Thread(target=node.exec_, args=(arguments.n_round,
                                                           arguments.epochs,
                                                           train_loader,
+                                                          test_loader,
                                                           barrier,
                                                           agg_barrier,
                                                           opt,

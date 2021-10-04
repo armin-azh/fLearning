@@ -85,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])
     parser.add_argument('--alpha', default=0.1, type=float, help="alpha for dirichlet distribution")
     parser.add_argument("--model_name", help="Model class name", type=str, default="cnn")
-    parser.add_argument("--epochs", help="total number of client epochs", type=int, default=1)
+    parser.add_argument("--epochs", help="total number of client epochs", type=int, default=10)
     parser.add_argument('--frac', default=0.4, type=float, help="the fraction of clients: C")
     parser.add_argument("--batch_size", help="local model batch size", type=int, default=16)
     parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)
