@@ -1,6 +1,7 @@
 import yaml
 import copy
 from pathlib import Path
+import pickle
 import numpy as np
 import torch
 
@@ -52,3 +53,28 @@ def save_parameters(args: dict, filename: Path) -> None:
     with open(str(filename), "w") as file:
         for key, value in args.items():
             file.write(f"{key}\t{value}\n")
+
+
+def send(**kwargs):
+    msg = pickle.dumps(kwargs["net"])
+    model_ready = True
+    while model_ready:
+        msg = bytes(f"{len(msg):<{10}}", 'utf-8') + msg
+        kwargs["conn"].sendall(msg)
+        model_ready = False
+
+
+def receive(**kwargs):
+    model_ready = True
+    new_msg = True
+    full_msg = b''
+    while model_ready:
+        msg = kwargs["conn"].recv(1024)
+        if new_msg:
+            msg_len = int(msg[:10])
+            new_msg = False
+        full_msg += msg
+        if len(full_msg) - 10 == msg_len:
+            new_msg = True
+            model_ready = False
+            return pickle.loads(full_msg[10:])

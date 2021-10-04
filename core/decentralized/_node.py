@@ -10,13 +10,15 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from core.utils import receive, send
+
 
 class SingleNode:
     SocketCheckList = {}
-    SocketRelease = None  # nd array
     SocketConnections = None  # nd array
     HostNameMap = {}
     HostCnt = 0
+    SendIdx = None
 
     def __init__(self, hostname: Tuple[str, int], connections: List[Tuple[str, int]], name: str, model,
                  glob_lock: Lock, host_idx: int):
@@ -35,10 +37,12 @@ class SingleNode:
         self._lock = threading.Lock()
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self._socket_conn = []
-        self._conn = []
+        self._socket_conn = []  # online connections to send
+        self._conn = []  # online connection to receive
         self._socket.bind(self._hostname)
         self._socket.listen()
+
+        self._receive_models = []
 
         # start connection and build graph process
         thread1 = threading.Thread(target=self._mk_accept, args=())
@@ -53,7 +57,8 @@ class SingleNode:
             print(f"[{self._node_name}] [{self._n_connected + 1}|{self._total_connections}] Connected, "
                   f"listening on {self._hostname[0]}:{self._hostname[1]}")
             conn, add = self._socket.accept()
-            self._conn.append(conn)
+            res = conn.recv(1024)
+            self._conn.append((conn, add, int(res)))
             self._n_connected += 1
 
         self._lock.acquire()
@@ -68,6 +73,7 @@ class SingleNode:
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.connect(conn)
+                sock.send(str(self._host_idx).encode())
                 add = sock.getsockname()
                 add = [str(add[0]), str(add[1])]
                 orig = ":".join(add)
@@ -79,7 +85,7 @@ class SingleNode:
                 SingleNode.SocketCheckList[orig] = des
                 self._glob_node_lock.release()
 
-                self._socket_conn.append(sock)
+                self._socket_conn.append((sock, orig))
                 time.sleep(random.randint(5, 9))
                 _idx += 1
             except ConnectionRefusedError:
@@ -89,13 +95,42 @@ class SingleNode:
     #     if self._conn is not None:
     #         self._conn.close()
 
-    def send(self, **kwargs):
-        pass
+    def send_all(self, r_barrier: Barrier, **kwargs):
 
-    def receive(self, **kwargs):
-        pass
+        r_barrier.wait()
+        time.sleep(1)
+        _idx = 0
+        while _idx < len(self._socket_conn):
+            print(f"[Node({self._host_idx})] sending [{_idx + 1}/{len(self._socket_conn)}]")
+            while True:
+                self._glob_node_lock.acquire()
+                print(type(SingleNode.SendIdx[self._host_idx]))
+                if SingleNode.SendIdx[self._host_idx] != 0:
+                    conn = SingleNode.SendIdx[self._host_idx]
+                    self._glob_node_lock.release()
+                    break
+                self._glob_node_lock.release()
+                time.sleep(2)
+            send(conn=conn, net=self._model)
+            _idx += 1
 
-    def exec_(self, n_round: int, epochs: int, train_loader: DataLoader, sync_barrier: Barrier, opt, criterion,
+    def receive_all(self, r_barrier: Barrier, **kwargs):
+
+        _idx = 1
+        for conn, add, _h_idx in self._conn:
+            r_barrier.wait()
+            print(f"[Node({self._host_idx})] receiving model {_idx} on {add}")
+            self._glob_node_lock.acquire()
+            SingleNode.SendIdx[_h_idx] = conn
+            self._glob_node_lock.release()
+            r_model = receive(conn=conn)
+            self._lock.acquire()
+            self._receive_models.append(r_model)
+            self._lock.release()
+            _idx += 1
+
+    def exec_(self, n_round: int, epochs: int, train_loader: DataLoader, sync_barrier: Barrier, agg_barrier: Barrier,
+              opt, criterion,
               opt_conf):
         total_acc = []
         total_loss = []
@@ -144,3 +179,20 @@ class SingleNode:
 
             print(f"[Node({self._host_idx})] ending round [{r + 1}/{n_round}] and waiting for other nodes")
             sync_barrier.wait()
+
+            t = threading.Thread(target=self.receive_all, args=(agg_barrier,))
+            t.start()
+            t = threading.Thread(target=self.send_all, args=(agg_barrier,))
+            t.start()
+
+            print(f"[Node({self._host_idx})] waiting for receiving all model from neighbors")
+
+            while True:
+                self._lock.acquire()
+                if len(self._receive_models) >= len(self._conn):
+                    self._lock.release()
+                    break
+                self._lock.release()
+                time.sleep(5)
+
+            print(f"[Node({self._host_idx})] all model are received from neighbors")

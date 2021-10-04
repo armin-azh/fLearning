@@ -21,7 +21,7 @@ class ComputationGraphService:
         self._nodes = []
 
         self._n_nodes = len(list(self._nodes_conf.values()))  # number of nodes
-        SingleNode.SocketRelease = np.zeros((self._n_nodes,))  # initiate the release tab
+        SingleNode.SendIdx = [0]*self._n_nodes
         SingleNode.SocketConnections = np.zeros((self._n_nodes,))  # initiate the connection
         glob_node_lock = threading.Lock()
 
@@ -57,6 +57,7 @@ class ComputationGraphService:
         print(f"[Train] now start training process on {self._n_classes} nodes")
 
         barrier = threading.Barrier(parties=self._n_nodes)
+        agg_barrier = threading.Barrier(parties=self._n_nodes*2)
 
         opt_conf = {
             "lr": arguments.lr,
@@ -83,6 +84,7 @@ class ComputationGraphService:
                                                           arguments.epochs,
                                                           train_loader,
                                                           barrier,
+                                                          agg_barrier,
                                                           opt,
                                                           loss,
                                                           opt_conf))
