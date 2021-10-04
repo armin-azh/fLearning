@@ -57,7 +57,7 @@ def main(arguments: Namespace) -> None:
 
     elif arguments.run_type == "decentralized":
         nodes = parse_node(parsed_yml=parsed_config)
-        cp = ComputationGraphService(parsed_yml=nodes)
+        cp = ComputationGraphService(parsed_yml=nodes, n_classes=arguments.n_classes, model_name=arguments.model_name)
 
     elif arguments.run_type == "centralized":
         pass

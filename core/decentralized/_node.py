@@ -8,11 +8,20 @@ import random
 
 class SingleNode:
     SocketCheckList = {}
+    SocketRelease = None    # nd array
+    SocketConnections = None    # nd array
+    HostNameMap = {}
+    HostCnt = 0
 
     def __init__(self, hostname: Tuple[str, int], connections: List[Tuple[str, int]], name: str, model,
-                 glob_lock: Lock):
+                 glob_lock: Lock, host_idx: int):
         self._node_name = name
+
+        # start make identification
         self._hostname = hostname
+        self._host_idx = host_idx
+        # end make identification
+
         self._connections = connections
         self._glob_node_lock = glob_lock
         self._total_connections = len(self._connections)
@@ -42,6 +51,9 @@ class SingleNode:
             self._conn.append(conn)
             self._n_connected += 1
 
+        self._lock.acquire()
+        SingleNode.SocketConnections[self._host_idx] = 1
+        self._lock.release()
         print(f"[{self._node_name}] Successfully all node are connected.")
 
     def _mk_connection(self):
