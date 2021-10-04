@@ -55,21 +55,21 @@ def save_parameters(args: dict, filename: Path) -> None:
             file.write(f"{key}\t{value}\n")
 
 
-def send(**kwargs):
-    msg = pickle.dumps(kwargs["net"])
+def send(net, conn, **kwargs):
+    msg = pickle.dumps(net)
     model_ready = True
     while model_ready:
         msg = bytes(f"{len(msg):<{10}}", 'utf-8') + msg
-        kwargs["conn"].sendall(msg)
+        conn.sendall(msg)
         model_ready = False
 
 
-def receive(**kwargs):
+def receive(conn, **kwargs):
     model_ready = True
     new_msg = True
     full_msg = b''
     while model_ready:
-        msg = kwargs["conn"].recv(1024)
+        msg = conn.recv(1024)
         if new_msg:
             msg_len = int(msg[:10])
             new_msg = False

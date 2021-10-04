@@ -95,39 +95,25 @@ class SingleNode:
     #     if self._conn is not None:
     #         self._conn.close()
 
-    def send_all(self, r_barrier: Barrier, **kwargs):
+    @classmethod
+    def open_access(cls):
+        res = True
+        for el in cls.SendIdx:
+            if not isinstance(el, socket.socket):
+                res = False
+                break
+        return res
 
-        r_barrier.wait()
-        time.sleep(1)
-        _idx = 0
-        while _idx < len(self._socket_conn):
-            print(f"[Node({self._host_idx})] sending [{_idx + 1}/{len(self._socket_conn)}]")
-            while True:
-                self._glob_node_lock.acquire()
-                print(type(SingleNode.SendIdx[self._host_idx]))
-                if SingleNode.SendIdx[self._host_idx] != 0:
-                    conn = SingleNode.SendIdx[self._host_idx]
-                    self._glob_node_lock.release()
-                    break
-                self._glob_node_lock.release()
-                time.sleep(2)
-            send(conn=conn, net=self._model)
-            _idx += 1
+    def send_all(self, conn, **kwargs):
+        send(conn=conn, net=self._model)
 
-    def receive_all(self, r_barrier: Barrier, **kwargs):
 
-        _idx = 1
-        for conn, add, _h_idx in self._conn:
-            r_barrier.wait()
-            print(f"[Node({self._host_idx})] receiving model {_idx} on {add}")
-            self._glob_node_lock.acquire()
-            SingleNode.SendIdx[_h_idx] = conn
-            self._glob_node_lock.release()
-            r_model = receive(conn=conn)
-            self._lock.acquire()
-            self._receive_models.append(r_model)
-            self._lock.release()
-            _idx += 1
+    def receive_all(self, conn, _idx, add, **kwargs):
+        r_model = receive(conn=conn)
+        print(f"[Node({self._host_idx})] received model {_idx+1} on {add}")
+        self._lock.acquire()
+        self._receive_models.append(r_model)
+        self._lock.release()
 
     def exec_(self, n_round: int, epochs: int, train_loader: DataLoader, sync_barrier: Barrier, agg_barrier: Barrier,
               opt, criterion,
@@ -180,10 +166,24 @@ class SingleNode:
             print(f"[Node({self._host_idx})] ending round [{r + 1}/{n_round}] and waiting for other nodes")
             sync_barrier.wait()
 
-            t = threading.Thread(target=self.receive_all, args=(agg_barrier,))
-            t.start()
-            t = threading.Thread(target=self.send_all, args=(agg_barrier,))
-            t.start()
+            # t = threading.Thread(target=self.receive_all, args=(agg_barrier,))
+            # t.start()
+            # t = threading.Thread(target=self.send_all, args=(agg_barrier,))
+            # t.start()
+
+            _idx = 0
+            for conn, add, _h_idx in self._conn:
+                t = threading.Thread(target=self.receive_all, args=(conn, _idx, add))
+                t.start()
+                _idx += 1
+
+            time.sleep(1)
+
+            _idx = 0
+            for sock, _ in self._socket_conn:
+                t = threading.Thread(target=self.send_all, args=(sock, ))
+                t.start()
+                _idx += 1
 
             print(f"[Node({self._host_idx})] waiting for receiving all model from neighbors")
 
