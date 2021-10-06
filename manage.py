@@ -15,6 +15,10 @@ from core.provider import (server_service_provider,
 from core.decentralized.utils import parse_node
 from core.decentralized.service import ComputationGraphService
 
+# cluster
+from core.cluster.utils import cluster_parse_node
+from core.cluster.service import ClusterComputationGraphService
+
 
 def main(arguments: Namespace) -> None:
     parsed_config = read_yaml_file(CONFIG)
@@ -60,8 +64,11 @@ def main(arguments: Namespace) -> None:
         cp = ComputationGraphService(parsed_yml=nodes, n_classes=arguments.n_classes, model_name=arguments.model_name)
         cp.train(arguments=arguments)
 
-    elif arguments.run_type == "centralized":
-        pass
+    elif arguments.run_type == "cluster":
+        nodes = cluster_parse_node(parsed_yml=parsed_config)
+        cp = ClusterComputationGraphService(parsed_yml=nodes, n_classes=arguments.n_classes,
+                                            model_name=arguments.model_name)
+        cp.train(arguments=arguments)
     else:
         print(f"[Failed] you had entered wrong option {arguments.run_type}")
 
@@ -85,7 +92,7 @@ if __name__ == '__main__':
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])
     parser.add_argument('--alpha', default=0.1, type=float, help="alpha for dirichlet distribution")
     parser.add_argument("--model_name", help="Model class name", type=str, default="cnn")
-    parser.add_argument("--epochs", help="total number of client epochs", type=int, default=10)
+    parser.add_argument("--epochs", help="total number of client epochs", type=int, default=1)
     parser.add_argument('--frac', default=0.4, type=float, help="the fraction of clients: C")
     parser.add_argument("--batch_size", help="local model batch size", type=int, default=16)
     parser.add_argument("--lr", help="learning rate", type=float, default=1e-3)

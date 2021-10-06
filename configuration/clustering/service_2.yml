@@ -1,0 +1,37 @@
+node1:
+  host: 127.0.0.1:65431
+  type: master
+  connection:
+    - 127.0.0.1:65432
+    - 127.0.0.1:65436
+    - 127.0.0.1:65435
+node2:
+  host: 127.0.0.1:65432
+  type: master
+  connection:
+    - 127.0.0.1:65431
+    - 127.0.0.1:65433
+    - 127.0.0.1:65434
+node3:
+  host: 127.0.0.1:65436
+  type: child
+  connection:
+    - 127.0.0.1:65431
+
+node4:
+  host: 127.0.0.1:65435
+  type: child
+  connection:
+    - 127.0.0.1:65431
+
+node5:
+  host: 127.0.0.1:65433
+  type: child
+  connection:
+    - 127.0.0.1:65432
+
+node6:
+  host: 127.0.0.1:65434
+  type: child
+  connection:
+    - 127.0.0.1:65432
