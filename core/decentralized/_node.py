@@ -205,6 +205,7 @@ class SingleNode:
 
             all_weights = []
 
+            self._receive_models.append(self._model)
             for i, model in enumerate(self._receive_models):
                 w = model.state_dict()
                 all_weights.append(copy.deepcopy(w))
