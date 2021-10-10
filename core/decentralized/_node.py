@@ -47,6 +47,7 @@ class SingleNode:
         self._conn = []  # online connection to receive
         self._socket.bind(self._hostname)
         self._socket.listen()
+        self._n_com = 0
 
         self._receive_models = []
 
@@ -118,6 +119,7 @@ class SingleNode:
         print(f"[Node({self._host_idx})] received model {_idx + 1} on {add}")
         self._lock.acquire()
         self._receive_models.append(r_model)
+        self._n_com += 1
         self._lock.release()
 
     def exec_(self, n_round: int, epochs: int,
@@ -131,12 +133,15 @@ class SingleNode:
 
         total_val_acc = []
         total_val_loss = []
+        
+        total_time = []
 
         opt = opt(self._model.parameters(), **opt_conf)
 
         step = 0
         for r in range(n_round):
             sync_barrier.wait()
+            start_time = time.time()
             print(f"[Node({self._host_idx})] starting round [{r + 1}/{n_round}]")
             ep_acc = []
             ep_loss = []
@@ -212,6 +217,8 @@ class SingleNode:
 
             avg_weights = fed_avg(all_weights)
             self._model.load_state_dict(avg_weights)
+            
+            total_time.append(time.time()-start_time)
 
             # start testing process
             self._model.eval()
@@ -235,10 +242,15 @@ class SingleNode:
         total_loss = np.array(total_loss)
         total_val_acc = np.array(total_val_acc)
         total_val_loss = np.array(total_val_loss)
+        total_time = np.array(total_time)
 
         np.save(str(self._save_weights.joinpath("train_acc.npy")), total_acc)
         np.save(str(self._save_weights.joinpath("train_loss.npy")), total_loss)
         np.save(str(self._save_weights.joinpath("val_acc.npy")), total_val_acc)
         np.save(str(self._save_weights.joinpath("val_loss.npy")), total_val_loss)
+        np.save(str(self._save_weights.joinpath("times.npy")), total_time)
+        
+        with open(str(self._save_weights.joinpath("n_communication.txt")),"w") as f:
+            f.write(f"Number of communication: {self._n_com}")
 
         torch.save(self._model.state_dict(), str(self._save_weights.joinpath("model.pth")))
