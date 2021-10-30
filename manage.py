@@ -19,6 +19,10 @@ from core.decentralized.service import ComputationGraphService
 from core.cluster.utils import cluster_parse_node
 from core.cluster.service import ClusterComputationGraphService
 
+# semi-sync
+from core.semi_sync.utils import parse_semi_sync
+from core.semi_sync.service import SemiSyncComputationGraphService
+
 
 def main(arguments: Namespace) -> None:
     parsed_config = read_yaml_file(CONFIG)
@@ -69,6 +73,12 @@ def main(arguments: Namespace) -> None:
         cp = ClusterComputationGraphService(parsed_yml=nodes, n_classes=arguments.n_classes,
                                             model_name=arguments.model_name)
         cp.train(arguments=arguments)
+
+    elif arguments.run_type == "semi-sync":
+        nodes = parse_semi_sync(parsed_yml=parsed_config)
+        cp = SemiSyncComputationGraphService(parsed_yml=nodes,
+                                             n_classes=arguments.n_classes,
+                                             model_name=arguments.model_name)
     else:
         print(f"[Failed] you had entered wrong option {arguments.run_type}")
 

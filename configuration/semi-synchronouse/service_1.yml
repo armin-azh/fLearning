@@ -1,0 +1,167 @@
+server:
+  host: 127.0.0.1:65431
+  fractions:
+    - 0.15
+    - 0.30
+    - 0.25
+    - 0.25
+    - 0.05
+  limit: 5
+  clients:
+    client1:
+      host: 127.0.0.1:65432
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+    client2:
+      host: 127.0.0.1:65433
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client3:
+      host: 127.0.0.1:65433
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client4:
+      host: 127.0.0.1:65434
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client5:
+      host: 127.0.0.1:65435
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+    client6:
+      host: 127.0.0.1:65436
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client7:
+      host: 127.0.0.1:65437
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client8:
+      host: 127.0.0.1:65438
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client9:
+      host: 127.0.0.1:65439
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client10:
+      host: 127.0.0.1:65440
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client11:
+      host: 127.0.0.1:65441
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client12:
+      host: 127.0.0.1:65442
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client13:
+      host: 127.0.0.1:65443
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client14:
+      host: 127.0.0.1:65444
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client15:
+      host: 127.0.0.1:65445
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client16:
+      host: 127.0.0.1:65446
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client17:
+      host: 127.0.0.1:65447
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client18:
+      host: 127.0.0.1:65448
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client19:
+      host: 127.0.0.1:65449
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
+
+    client20:
+      host: 127.0.0.1:65450
+      battery: 40000
+      socket: 1
+      cores: 1
+      speed: 2
+      flop: 4
