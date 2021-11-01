@@ -37,7 +37,7 @@ class SemiSyncComputationGraphService:
             frac = self._fractions[idx]
             cl = self._clients_classes[idx]
             n_select = int(np.ceil(frac * len(cl)))
-            cl_idx = np.random.choice(np.arange(len(cl)), size=n_select)
+            cl_idx = np.random.choice(np.arange(len(cl)), size=n_select, replace=False)
 
             for i in cl_idx:
                 self._selected_clients.append(cl[i])
@@ -60,13 +60,16 @@ class SemiSyncComputationGraphService:
 
         self._nodes = []
         idx = 0
+
         for val in self._selected_clients:
             (host, port), score = val
+            client_model = create_model(name=self._model_name, num_classes=self._n_classes, device="cpu")
             self._nodes.append(ClientNode(hostname=(host, port),
                                           connection=self._nodes_conf["server"],
                                           glob_lock=glob_node_lock,
                                           host_idx=idx,
-                                          save_path=save_path))
+                                          save_path=save_path,
+                                          model=client_model))
             idx += 1
 
         # start, make sure that all computation graph is built
@@ -83,7 +86,7 @@ class SemiSyncComputationGraphService:
         # start training process
         print(f"[Train] now start training process on {self._n_classes} nodes")
 
-        start_barrier = threading.Barrier(parties=len(self._nodes)+1)
+        start_barrier = threading.Barrier(parties=len(self._nodes) + 1)
         agg_barrier = threading.Barrier(parties=self._nodes_conf["limit"])
 
         opt_conf = {
@@ -100,8 +103,28 @@ class SemiSyncComputationGraphService:
                                                   batch_size=arguments.batch_size,
                                                   n_data=None,
                                                   num_workers=arguments.n_worker,
-                                                  seed=arguments.seed, )
+                                                  seed=arguments.seed)
 
+        # start, start all client node
         for idx, node in enumerate(self._nodes):
-            pass
+            opt = torch.optim.SGD
+            loss = nn.CrossEntropyLoss()
+            train_loader = client_loaders[idx]
+            t = threading.Thread(target=node.exec_, args=(arguments.n_round,
+                                                          arguments.epochs,
+                                                          train_loader,
+                                                          start_barrier,
+                                                          agg_barrier,
+                                                          opt,
+                                                          loss,
+                                                          opt_conf))
+            t.start()
+        # end, start all client node
 
+        # start, start server node
+        opt = torch.optim.SGD
+        loss = nn.CrossEntropyLoss()
+        t = threading.Thread(target=self._server_node.exec_,
+                             args=(start_barrier, opt, loss, opt_conf, arguments.n_round, self._nodes_conf["limit"]))
+        t.start()
+        # end, start server node

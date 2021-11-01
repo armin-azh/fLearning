@@ -6,7 +6,7 @@ server:
     - 0.25
     - 0.25
     - 0.05
-  limit: 5
+  limit: 3
   clients:
     client1:
       host: 127.0.0.1:65432

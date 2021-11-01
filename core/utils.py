@@ -70,6 +70,8 @@ def receive(conn, **kwargs):
     full_msg = b''
     while model_ready:
         msg = conn.recv(1024)
+        if msg == b'':
+            continue
         if new_msg:
             msg_len = int(msg[:10])
             new_msg = False
