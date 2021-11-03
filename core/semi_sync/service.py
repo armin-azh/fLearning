@@ -15,6 +15,7 @@ from ._node import ServerNode
 from ._node import ClientNode
 
 from settings import DEFAULT_OUTPUT_DIR, TIME_SCALE
+from core.utils import save_parameters
 
 
 class SemiSyncComputationGraphService:
@@ -48,6 +49,8 @@ class SemiSyncComputationGraphService:
         save_path = DEFAULT_OUTPUT_DIR.joinpath("cluster").joinpath("semi-sync").joinpath(_cu)
         save_path.mkdir(exist_ok=True, parents=True)
 
+        self._save_path = save_path
+
         ServerNode.SocketConnections = np.zeros((len(self._selected_clients),))  # initiate the connection
         glob_node_lock = threading.Lock()
 
@@ -60,12 +63,12 @@ class SemiSyncComputationGraphService:
 
         self._nodes = []
         idx = 0
-        
+
         flops = np.array([p for (_, _), p in self._selected_clients])
 
         for val in self._selected_clients:
             (host, port), flop = val
-            delay_fraction = np.abs(flop - flops.mean())/(flops.std()+np.finfo(np.float32).eps)
+            delay_fraction = np.abs(flop - flops.mean()) / (flops.std() + np.finfo(np.float32).eps)
 
             client_model = create_model(name=self._model_name, num_classes=self._n_classes, device="cpu")
             self._nodes.append(ClientNode(hostname=(host, port),
@@ -74,7 +77,7 @@ class SemiSyncComputationGraphService:
                                           host_idx=idx,
                                           save_path=save_path,
                                           model=client_model,
-                                          delay=np.ceil(delay_fraction*TIME_SCALE).astype(np.int)))
+                                          delay=np.ceil(delay_fraction * TIME_SCALE).astype(np.int)))
             idx += 1
 
         # start, make sure that all computation graph is built
@@ -89,6 +92,8 @@ class SemiSyncComputationGraphService:
 
     def train(self, arguments):
         # start training process
+
+        save_parameters(args=vars(arguments), filename=self._save_path.joinpath("parameters.txt"))
         print(f"[Train] now start training process on {self._n_classes} nodes")
 
         start_barrier = threading.Barrier(parties=len(self._nodes) + 1)

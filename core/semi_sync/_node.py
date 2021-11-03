@@ -59,6 +59,8 @@ class ServerNode:
         self._receive_models = None
         self._n_com = 0
 
+        self._update_idx = 1
+
         # start connection and build graph process
         thread1 = threading.Thread(target=self._mk_accept, args=())
         thread1.start()
@@ -193,6 +195,9 @@ class ServerNode:
                 total_val_loss.append(val_loss)
                 # end, validation
 
+                print(
+                    f"Aggregation[{self._update_idx}] | Validation Loss: {total_val_loss[-1]}, Validation Acc: {total_val_acc[-1]}")
+
                 # start, sending model
                 for conn in connections_to_send:
                     t = threading.Thread(target=self.send_all, args=(conn, self._model))
@@ -208,7 +213,6 @@ class ServerNode:
         total_val_loss = np.array(total_val_loss)
         np.save(str(self._save_weights.joinpath("val_acc.npy")), total_val_acc)
         np.save(str(self._save_weights.joinpath("val_loss.npy")), total_val_loss)
-
 
 
 class ClientNode:
@@ -386,6 +390,3 @@ class ClientNode:
         with open(str(self._save_weights.joinpath("n_communication.txt")), "w") as f:
             f.write(f"Number of communication: {self._n_com}\n")
             f.write(f"Injected Delay: {self._delay} seconds.\n")
-
-
-
