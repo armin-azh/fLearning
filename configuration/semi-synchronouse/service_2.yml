@@ -1,0 +1,430 @@
+server:
+  clients:
+    client1:
+      battery: 4000
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65432
+      socket: 1
+      speed: 3.6
+    client10:
+      battery: 4100
+      cores: 4
+      flop: 8
+      host: 127.0.0.1:65441
+      socket: 1
+      speed: 3.5
+    client11:
+      battery: 6300
+      cores: 4
+      flop: 8
+      host: 127.0.0.1:65442
+      socket: 1
+      speed: 3.0
+    client12:
+      battery: 2300
+      cores: 1
+      flop: 8
+      host: 127.0.0.1:65443
+      socket: 1
+      speed: 2.3
+    client13:
+      battery: 2500
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65444
+      socket: 1
+      speed: 1.3
+    client14:
+      battery: 4900
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65445
+      socket: 1
+      speed: 3.5
+    client15:
+      battery: 2300
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65446
+      socket: 1
+      speed: 3.5
+    client16:
+      battery: 2500
+      cores: 2
+      flop: 8
+      host: 127.0.0.1:65447
+      socket: 1
+      speed: 2.2
+    client17:
+      battery: 6300
+      cores: 6
+      flop: 4
+      host: 127.0.0.1:65448
+      socket: 1
+      speed: 3.5
+    client18:
+      battery: 4000
+      cores: 8
+      flop: 4
+      host: 127.0.0.1:65449
+      socket: 1
+      speed: 3.6
+    client19:
+      battery: 2300
+      cores: 4
+      flop: 8
+      host: 127.0.0.1:65450
+      socket: 1
+      speed: 3.0
+    client2:
+      battery: 3600
+      cores: 6
+      flop: 4
+      host: 127.0.0.1:65433
+      socket: 1
+      speed: 3.5
+    client20:
+      battery: 4000
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65451
+      socket: 1
+      speed: 3.5
+    client21:
+      battery: 3500
+      cores: 4
+      flop: 8
+      host: 127.0.0.1:65452
+      socket: 1
+      speed: 3.0
+    client22:
+      battery: 4100
+      cores: 4
+      flop: 4
+      host: 127.0.0.1:65453
+      socket: 1
+      speed: 2.2
+    client23:
+      battery: 2500
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65454
+      socket: 1
+      speed: 2.0
+    client24:
+      battery: 3600
+      cores: 4
+      flop: 8
+      host: 127.0.0.1:65455
+      socket: 1
+      speed: 3.0
+    client25:
+      battery: 4100
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65456
+      socket: 1
+      speed: 1.3
+    client26:
+      battery: 4900
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65457
+      socket: 1
+      speed: 3.5
+    client27:
+      battery: 6300
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65458
+      socket: 1
+      speed: 3.6
+    client28:
+      battery: 3500
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65459
+      socket: 1
+      speed: 2.3
+    client29:
+      battery: 4900
+      cores: 4
+      flop: 8
+      host: 127.0.0.1:65460
+      socket: 1
+      speed: 3.6
+    client3:
+      battery: 6300
+      cores: 6
+      flop: 8
+      host: 127.0.0.1:65434
+      socket: 1
+      speed: 3.5
+    client30:
+      battery: 2300
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65461
+      socket: 1
+      speed: 1.3
+    client31:
+      battery: 3500
+      cores: 8
+      flop: 4
+      host: 127.0.0.1:65462
+      socket: 1
+      speed: 2.3
+    client32:
+      battery: 2500
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65463
+      socket: 1
+      speed: 2.3
+    client33:
+      battery: 4900
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65464
+      socket: 1
+      speed: 1.3
+    client34:
+      battery: 2500
+      cores: 8
+      flop: 4
+      host: 127.0.0.1:65465
+      socket: 1
+      speed: 3.0
+    client35:
+      battery: 3500
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65466
+      socket: 1
+      speed: 3.6
+    client36:
+      battery: 2500
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65467
+      socket: 1
+      speed: 2.3
+    client37:
+      battery: 3500
+      cores: 1
+      flop: 8
+      host: 127.0.0.1:65468
+      socket: 1
+      speed: 3.5
+    client38:
+      battery: 4900
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65469
+      socket: 1
+      speed: 1.3
+    client39:
+      battery: 2300
+      cores: 8
+      flop: 4
+      host: 127.0.0.1:65470
+      socket: 1
+      speed: 2.0
+    client4:
+      battery: 4500
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65435
+      socket: 1
+      speed: 2.0
+    client40:
+      battery: 4100
+      cores: 6
+      flop: 8
+      host: 127.0.0.1:65471
+      socket: 1
+      speed: 1.3
+    client41:
+      battery: 4900
+      cores: 2
+      flop: 8
+      host: 127.0.0.1:65472
+      socket: 1
+      speed: 3.5
+    client42:
+      battery: 2500
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65473
+      socket: 1
+      speed: 3.0
+    client43:
+      battery: 3500
+      cores: 4
+      flop: 4
+      host: 127.0.0.1:65474
+      socket: 1
+      speed: 2.3
+    client44:
+      battery: 2300
+      cores: 1
+      flop: 8
+      host: 127.0.0.1:65475
+      socket: 1
+      speed: 3.0
+    client45:
+      battery: 2500
+      cores: 4
+      flop: 4
+      host: 127.0.0.1:65476
+      socket: 1
+      speed: 2.2
+    client46:
+      battery: 4000
+      cores: 1
+      flop: 8
+      host: 127.0.0.1:65477
+      socket: 1
+      speed: 3.0
+    client47:
+      battery: 4900
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65478
+      socket: 1
+      speed: 2.3
+    client48:
+      battery: 4900
+      cores: 8
+      flop: 4
+      host: 127.0.0.1:65479
+      socket: 1
+      speed: 1.3
+    client49:
+      battery: 2500
+      cores: 2
+      flop: 8
+      host: 127.0.0.1:65480
+      socket: 1
+      speed: 1.3
+    client5:
+      battery: 3600
+      cores: 6
+      flop: 8
+      host: 127.0.0.1:65436
+      socket: 1
+      speed: 2.2
+    client50:
+      battery: 4500
+      cores: 8
+      flop: 4
+      host: 127.0.0.1:65481
+      socket: 1
+      speed: 2.0
+    client51:
+      battery: 4500
+      cores: 6
+      flop: 8
+      host: 127.0.0.1:65482
+      socket: 1
+      speed: 3.5
+    client52:
+      battery: 3600
+      cores: 6
+      flop: 8
+      host: 127.0.0.1:65483
+      socket: 1
+      speed: 1.3
+    client53:
+      battery: 3500
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65484
+      socket: 1
+      speed: 2.3
+    client54:
+      battery: 2500
+      cores: 2
+      flop: 8
+      host: 127.0.0.1:65485
+      socket: 1
+      speed: 3.5
+    client55:
+      battery: 4000
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65486
+      socket: 1
+      speed: 3.5
+    client56:
+      battery: 6300
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65487
+      socket: 1
+      speed: 2.0
+    client57:
+      battery: 4100
+      cores: 4
+      flop: 4
+      host: 127.0.0.1:65488
+      socket: 1
+      speed: 2.0
+    client58:
+      battery: 4100
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65489
+      socket: 1
+      speed: 2.0
+    client59:
+      battery: 2300
+      cores: 6
+      flop: 8
+      host: 127.0.0.1:65490
+      socket: 1
+      speed: 3.5
+    client6:
+      battery: 3600
+      cores: 1
+      flop: 4
+      host: 127.0.0.1:65437
+      socket: 1
+      speed: 3.5
+    client60:
+      battery: 4100
+      cores: 2
+      flop: 4
+      host: 127.0.0.1:65491
+      socket: 1
+      speed: 3.5
+    client7:
+      battery: 3600
+      cores: 8
+      flop: 8
+      host: 127.0.0.1:65438
+      socket: 1
+      speed: 2.2
+    client8:
+      battery: 2300
+      cores: 2
+      flop: 8
+      host: 127.0.0.1:65439
+      socket: 1
+      speed: 3.6
+    client9:
+      battery: 4900
+      cores: 2
+      flop: 8
+      host: 127.0.0.1:65440
+      socket: 1
+      speed: 3.6
+  fractions:
+  - 0.15
+  - 0.3
+  - 0.25
+  - 0.25
+  - 0.25
+  host: 127.0.0.1:65431
+  limit: 3
