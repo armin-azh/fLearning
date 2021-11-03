@@ -118,15 +118,6 @@ class ServerNode:
             self.receive_all(conn)
 
     def exec_(self, start_barrier: Barrier, opt, criterion, opt_conf, n_round, limit, test_loader):
-        print("===> Receive: ")
-        for sock in self._socket_conn:
-            print(sock)
-
-        print("===> Send: ")
-        for conn in self._conn:
-            print(conn)
-
-        print(ServerNode.Mapper)
         print(f'[{self._node_name}] now is running')
         opt = opt(self._model.parameters(), **opt_conf)
 
@@ -196,7 +187,10 @@ class ServerNode:
                 # end, validation
 
                 print(
-                    f"Aggregation[{self._update_idx}] | Validation Loss: {total_val_loss[-1]}, Validation Acc: {total_val_acc[-1]}")
+                    f"Aggregation[{self._update_idx}] | Validation Loss: {total_val_loss[-1]}, "
+                    f"Validation Acc: {total_val_acc[-1]}")
+
+                self._update_idx += 1
 
                 # start, sending model
                 for conn in connections_to_send:
