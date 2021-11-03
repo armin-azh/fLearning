@@ -98,6 +98,7 @@ if __name__ == '__main__':
     # system
     parser.add_argument("--n_round", help="Number of rounds", type=int, default=DEFAULT_N_ROUND)
     parser.add_argument("--n_limit", help="Number of round for semi-synchronous", type=int, default=DEFAULT_N_LIMIT)
+    parser.add_argument("--diff", help="models version difference", type=int, default=3)
 
     # local model
     parser.add_argument("--n_classes", help="number of classes", type=int, default=10, choices=[10, 100])

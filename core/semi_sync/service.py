@@ -130,6 +130,11 @@ class SemiSyncComputationGraphService:
         opt = torch.optim.SGD
         loss = nn.CrossEntropyLoss()
         t = threading.Thread(target=self._server_node.exec_,
-                             args=(start_barrier, opt, loss, opt_conf, arguments.n_round, self._nodes_conf["limit"]))
+                             args=(start_barrier,
+                                   opt, loss,
+                                   opt_conf,
+                                   arguments.n_round,
+                                   self._nodes_conf["limit"],
+                                   test_loader))
         t.start()
         # end, start server node

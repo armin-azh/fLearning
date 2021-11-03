@@ -115,7 +115,7 @@ class ServerNode:
         for _idx in range(n_round):
             self.receive_all(conn)
 
-    def exec_(self, start_barrier: Barrier, opt, criterion, opt_conf, n_round, limit):
+    def exec_(self, start_barrier: Barrier, opt, criterion, opt_conf, n_round, limit, test_loader):
         print("===> Receive: ")
         for sock in self._socket_conn:
             print(sock)
@@ -127,6 +127,9 @@ class ServerNode:
         print(ServerNode.Mapper)
         print(f'[{self._node_name}] now is running')
         opt = opt(self._model.parameters(), **opt_conf)
+
+        total_val_acc = []
+        total_val_loss = []
 
         start_barrier.wait()
 
@@ -172,6 +175,24 @@ class ServerNode:
                             connections_to_send.append(conn)
                             break
 
+                # start, validation
+                self._model.eval()
+                with torch.no_grad():
+                    test_correct = 0
+                    total = 0
+                    for x, y in test_loader:
+                        x = x.cpu()
+                        y = y.cpu()
+                        y_hat = self._model(x)
+                        val_loss = criterion(y_hat, y)
+                        prediction = torch.max(y_hat, 1)
+                        total += y.size(0)
+                        test_correct += np.sum(prediction[1].cpu().numpy() == y.cpu().numpy())
+                    val_acc = float(test_correct) / total
+                total_val_acc.append(val_acc)
+                total_val_loss.append(val_loss)
+                # end, validation
+
                 # start, sending model
                 for conn in connections_to_send:
                     t = threading.Thread(target=self.send_all, args=(conn, self._model))
@@ -182,6 +203,12 @@ class ServerNode:
 
             self._glob_node_lock.release()
             # end, check all connections are gone
+
+        total_val_acc = np.array(total_val_acc)
+        total_val_loss = np.array(total_val_loss)
+        np.save(str(self._save_weights.joinpath("val_acc.npy")), total_val_acc)
+        np.save(str(self._save_weights.joinpath("val_loss.npy")), total_val_loss)
+
 
 
 class ClientNode:
@@ -194,6 +221,7 @@ class ClientNode:
                  model,
                  delay: Union[None, int]):
         self._node_name = f"Client_{host_idx}"
+        self._node_idx = host_idx
         self._save_path = save_path.joinpath(self._node_name)
         self._save_path.mkdir(parents=True, exist_ok=True)
         self._save_weights = self._save_path.joinpath("weight")
@@ -341,3 +369,23 @@ class ClientNode:
             print(f"[{self._node_name}] model received.")
             # end operation
             total_time.append(time.time() - start_time)
+
+        # closing connection signal
+        self._glob_node_lock.acquire()
+        ServerNode.SocketConnections[self._node_idx] = 0
+        self._glob_node_lock.release()
+
+        total_acc = np.array(total_acc)
+        total_loss = np.array(total_loss)
+        total_time = np.array(total_time)
+
+        np.save(str(self._save_weights.joinpath("train_acc.npy")), total_acc)
+        np.save(str(self._save_weights.joinpath("train_loss.npy")), total_loss)
+        np.save(str(self._save_weights.joinpath("times.npy")), total_time)
+
+        with open(str(self._save_weights.joinpath("n_communication.txt")), "w") as f:
+            f.write(f"Number of communication: {self._n_com}\n")
+            f.write(f"Injected Delay: {self._delay} seconds.\n")
+
+
+
