@@ -27,3 +27,5 @@ DEFAULT_N_ROUND = 2
 DEFAULT_N_LIMIT = 1
 
 RUN_TYPE = ["centralized", "decentralized", "cluster", "semi-sync"]
+
+TIME_SCALE = 10

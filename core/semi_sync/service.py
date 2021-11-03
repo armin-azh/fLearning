@@ -14,7 +14,7 @@ from core.loader import get_cifar, get_loaders
 from ._node import ServerNode
 from ._node import ClientNode
 
-from settings import DEFAULT_OUTPUT_DIR
+from settings import DEFAULT_OUTPUT_DIR, TIME_SCALE
 
 
 class SemiSyncComputationGraphService:
@@ -60,16 +60,21 @@ class SemiSyncComputationGraphService:
 
         self._nodes = []
         idx = 0
+        
+        flops = np.array([p for (_, _), p in self._selected_clients])
 
         for val in self._selected_clients:
-            (host, port), score = val
+            (host, port), flop = val
+            delay_fraction = np.abs(flop - flops.mean())/(flops.std()+np.finfo(np.float32).eps)
+
             client_model = create_model(name=self._model_name, num_classes=self._n_classes, device="cpu")
             self._nodes.append(ClientNode(hostname=(host, port),
                                           connection=self._nodes_conf["server"],
                                           glob_lock=glob_node_lock,
                                           host_idx=idx,
                                           save_path=save_path,
-                                          model=client_model))
+                                          model=client_model,
+                                          delay=np.ceil(delay_fraction*TIME_SCALE).astype(np.int)))
             idx += 1
 
         # start, make sure that all computation graph is built

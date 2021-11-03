@@ -191,12 +191,14 @@ class ClientNode:
                  glob_lock: Lock,
                  host_idx: int,
                  save_path: Path,
-                 model):
+                 model,
+                 delay: Union[None, int]):
         self._node_name = f"Client_{host_idx}"
         self._save_path = save_path.joinpath(self._node_name)
         self._save_path.mkdir(parents=True, exist_ok=True)
         self._save_weights = self._save_path.joinpath("weight")
         self._save_weights.mkdir(parents=True, exist_ok=True)
+        self._delay = delay
 
         self._model = model
 
@@ -325,6 +327,12 @@ class ClientNode:
 
             total_acc.append(np.array(ep_acc).mean())
             total_loss.append(np.array(ep_loss).mean())
+
+            # start, add delay to the training procedure
+            if self._delay is not None or self._delay != 0:
+                time.sleep(self._delay)
+            # end, add delay to the training procedure
+
             # start operation
             print(f"[{self._node_name}] sending the model.")
             self.send_all(self._socket_conn[0])
