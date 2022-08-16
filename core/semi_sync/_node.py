@@ -137,7 +137,8 @@ class ServerNode:
                 self._glob_node_lock.release()
                 break
 
-            if len(ServerNode.Accumulator) >= limit:
+            s_len = len(ServerNode.Accumulator)
+            if s_len >= limit or np.count_nonzero(ServerNode.SocketConnections) <= s_len:
                 # start, aggregation
 
                 # update model
@@ -288,9 +289,10 @@ class ClientNode:
 
     def receive_all(self, conn, **kwargs):
         r_model = receive(conn=conn)
+        w = r_model.state_dict()
         print(f"[{self._node_name}] received model.")
         self._lock.acquire()
-        self._model = r_model
+        self._model.load_state_dict(w)
         self._n_com += 1
         self._lock.release()
 
